@@ -9,6 +9,63 @@
 #include "AccountManager.h"
 #include "UserManager.h"
 
+#include <Windows.h>
+
+mutex m;
+queue<int32> q;
+HANDLE handle;
+
+void Producer()
+{
+	while (true)
+	{
+		{
+			unique_lock<mutex> lock(m);
+			q.push(100);
+		}
+
+		::SetEvent(handle); //커널 오브젝트 handle을 singal 상태로 변환
+		this_thread::sleep_for(10000ms);
+	}
+}
+
+void Consumer()
+{
+	int32 i = 0;
+	while (true)
+	{
+		::WaitForSingleObject(handle, INFINITE); //논 시그널 상태일 시 수면상태 //bManualRset이 자동리셋이므로 Signal일 시 다시 Non-Signal로
+		//::ResetEvent(handle); //자동리셋 아닐 시 수동으로 Non-Signal로 리셋하여야 함
+
+		unique_lock<mutex> lock(m);
+		if (q.empty() == false)
+		{
+			int32 data = q.front();
+			q.pop();
+			cout << data << " " << i++ << endl;
+		}
+	}
+}
+
+int main()
+{
+	// 커널 오브젝트
+	// Usage Count
+	// Signal (파란불) / Non-Signal (빨간불) << bool
+	// Auto / Manual << bool
+	//window api, bManualReset: 수동 리셋/자동 리셋(false), bInitialState: signal/non signal
+	handle = ::CreateEvent(NULL/*보안속성*/, FALSE/*bManualReset*/,FALSE/*bInitialState*/,NULL); //handel 인덱스를 넘김
+
+	thread t1(Producer);
+	thread t2(Consumer);
+
+	t1.join();
+	t2.join();
+
+	::CloseHandle(handle);
+}
+
+/*
 class SpinLock
 {
 public:
@@ -94,6 +151,7 @@ int main()
 
 	cout << sum << endl;
 }
+*/
 
 /*
 
