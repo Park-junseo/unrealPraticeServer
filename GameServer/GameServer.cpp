@@ -36,6 +36,10 @@ public:
 		while (_locked.compare_exchange_strong(expected, desired) == false) //expected에 _locked 값이 들어가고 expected가 desired 값이 되면 성공 true 반환
 		{
 			expected = false;
+
+			this_thread::sleep_for(0ms);
+			//this_thread::yield(); <--this_thread::sleep_for(0ms);
+			//this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
 
 		//while (_locked)
