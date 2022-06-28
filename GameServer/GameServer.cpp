@@ -3,6 +3,7 @@
 #include "CorePch.h"
 
 #include <thread>
+#include <atomic>
 
 void HelloThread()
 {
@@ -14,15 +15,20 @@ void HelloThread_2(int32 num)
 	cout << num << endl;
 }
 
-int32 sum = 0;
+// atomic : All-Or-Nothing
+
+// DB
+atomic<int32> sum = 0;
 
 void Add()
 {
 	for (int32 i = 0; i < 100'0000; i++)
 	{
-		int32 eax = sum;
-		eax = eax + 1;
-		sum = eax;
+		sum.fetch_add(1);
+		//sum++;
+		//int32 eax = sum;
+		//eax = eax + 1;
+		//sum = eax;
 	}
 }
 
@@ -30,9 +36,11 @@ void Sub()
 {
 	for (int32 i = 0; i < 100'0000; i++)
 	{
-		int32 eax = sum;
-		eax = eax - 1;
-		sum = eax;
+		sum.fetch_add(-1);
+		//sum--;
+		//int32 eax = sum;
+		//eax = eax - 1;
+		//sum = eax;
 	}
 }
 
