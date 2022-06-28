@@ -11,21 +11,33 @@
 
 #include <Windows.h>
 
+#include <future>
+
 mutex m;
 queue<int32> q;
 HANDLE handle;
+
+// 참고) CV 는 User-Level Object (커널 오브젝트X)
+condition_variable cv;
 
 void Producer()
 {
 	while (true)
 	{
+		// 1) Lock을 잡고
+		// 2) 공유 변수 값을 수정
+		// 3) Lock을 풀고
+		// 4) 조건변수 통해 다른 쓰레드에게 통지
 		{
 			unique_lock<mutex> lock(m);
 			q.push(100);
 		}
 
-		::SetEvent(handle); //커널 오브젝트 handle을 singal 상태로 변환
-		this_thread::sleep_for(10000ms);
+		cv.notify_one(); // wait 중인 쓰레드가 있으면 딱 1개를 깨운다
+
+		//Event Lock
+		//::SetEvent(handle); //커널 오브젝트 handle을 singal 상태로 변환
+		//this_thread::sleep_for(10000ms);
 	}
 }
 
@@ -34,11 +46,23 @@ void Consumer()
 	int32 i = 0;
 	while (true)
 	{
-		::WaitForSingleObject(handle, INFINITE); //논 시그널 상태일 시 수면상태 //bManualRset이 자동리셋이므로 Signal일 시 다시 Non-Signal로
-		//::ResetEvent(handle); //자동리셋 아닐 시 수동으로 Non-Signal로 리셋하여야 함
-
 		unique_lock<mutex> lock(m);
-		if (q.empty() == false)
+		cv.wait(lock, []() { return q.empty() == false; }); //조건
+		// 1) Lock 잡고
+		// 2) 조건 확인
+		// - 만족0 => 빠져 나와서 이어서 코드 진행
+		// - 만족X => Lock 풀어주고 대기 상태
+
+		// 그런데 notify_one을 했으면 항상 조건식을 만족하는가?
+		// Suprious Wakeup (가짜 기상?)
+		// notify_one할 때 lock을 잡고 있는 것이 아니기 때문
+
+		// Event Lock
+		//::WaitForSingleObject(handle, INFINITE); //논 시그널 상태일 시 수면상태 //bManualRset이 자동리셋이므로 Signal일 시 다시 Non-Signal로
+		////::ResetEvent(handle); //자동리셋 아닐 시 수동으로 Non-Signal로 리셋하여야 함
+
+		//unique_lock<mutex> lock(m);
+		while (q.empty() == false)
 		{
 			int32 data = q.front();
 			q.pop();
@@ -64,6 +88,7 @@ int main()
 
 	::CloseHandle(handle);
 }
+
 
 /*
 class SpinLock
