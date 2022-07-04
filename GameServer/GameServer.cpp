@@ -13,6 +13,108 @@
 
 #include <future>
 
+int64 result;
+
+int64 Calculate()
+{
+	int64 sum = 0;
+
+	for (int32 i = 0; i < 100'000; i++)
+		sum += 1;
+	
+	return sum;
+}
+
+void PromiseWorker(std::promise<string>&& promise)
+{
+	promise.set_value("Secret Messege");
+}
+
+void TaskWorker(std::packaged_task<int64(void)>&& task)
+{
+	task();
+}
+int main()
+{
+	//동기(synchronous) 실행
+	int64 sum = Calculate();
+	cout << sum << endl;
+
+	//비동기 != 멀티 쓰레드
+
+	// std::future
+	// Cacluate 라는 일감 하나를 실행하기 위한 전용 쓰레드를 만들어 떠넘긴 상태
+	{
+		// 인수 속성
+		// 1) defferred -> lazy evaluation 지연 실행
+		// 2) async -> 별도의 쓰레드를 만들어서 실행
+		// 3) deffered | async -> 둘 중 알아서 선택
+		// 비동기 방식으로 Calculate 함수 호출, 언젠가 미래에 결과물을 반환 
+		std::future<int64> future = std::async(std::launch::async, Calculate);
+
+		// TODO
+		//std::future_status  status = future.wait_for(1ms);
+		//if (status == future_status::ready)
+		//{
+
+		//}
+
+		//future.wait(); //wait 후에 get 호출하나 wait도 결과물이 나올때까지 기다린다.
+
+		int64 sum = future.get(); //결과물이 이제서야 필요하다
+
+		//class Knight
+		//{
+		//public:
+		//	int64 GetHp() { return 100; }
+		//};
+		//Knight knight;
+		//std::future<int64> future2 = std::async(std::launch::async, &Knight::GetHp, knight);//클래스 메소드 호출 예제
+	}
+
+	// std::promise
+
+	{
+		// 미래(std::future)에 결과물을 반환해줄 것이라고 약속함 (std::promise) 
+		std::promise<string> promise; //promise는 메인 쓰레드가 가짐
+		std::future<string> future = promise.get_future();
+
+		thread t(PromiseWorker, std::move(promise)); //PromiseWorker 쓰레드에 promise를 넘김
+
+		string message = future.get();
+		cout << message << endl;
+
+		t.join();
+	}
+
+	// std::packaged_task
+	// 쓰레드를 만들어 일감을 넘김
+	// 한 쓰레드가 여러 테스크를 처리할 수 있음
+	{
+		std::packaged_task<int64(void)> task(Calculate); //Calcuate 결과물 자체가 future를 통해 받아올 수 있음
+		std::future<int64> future = task.get_future();
+
+		std::thread t(TaskWorker, std::move(task)); //thread가 호출될 때 task가 호출이 되고 future 객체를 통해 추출해줄 수 있음
+
+		int64 sum = future.get();
+		cout << sum << endl;
+
+		t.join();
+	}
+
+	// 결론)
+	// mutex, condition_variable까지 가지 않고 단순한 애들을 처리할 수 있는
+	// 특히나, 한 번 발생하는 이벤트에 유용하다!
+	// 닭 잡는데 소 잡는 칼 쓸 필요 없다!
+	// 1) async
+	// 원하는 함수를 비동기적으로 실행
+	// 2) promise
+	// 결과물을 promise를 통해 future로 받아줌
+	// 3) packaged_task
+	// 원하는 함수의 실행 결과를 packaged_task를 통해 future로 받아줌
+}
+
+/*
 mutex m;
 queue<int32> q;
 HANDLE handle;
@@ -78,7 +180,12 @@ int main()
 	// Signal (파란불) / Non-Signal (빨간불) << bool
 	// Auto / Manual << bool
 	//window api, bManualReset: 수동 리셋/자동 리셋(false), bInitialState: signal/non signal
-	handle = ::CreateEvent(NULL/*보안속성*/, FALSE/*bManualReset*/,FALSE/*bInitialState*/,NULL); //handel 인덱스를 넘김
+	handle = ::CreateEvent(
+		NULL, //보안속성
+		FALSE,//bManualReset
+		FALSE,//bInitialState
+		NULL
+	); //handel 인덱스를 넘김
 
 	thread t1(Producer);
 	thread t2(Consumer);
@@ -88,7 +195,7 @@ int main()
 
 	::CloseHandle(handle);
 }
-
+*/
 
 /*
 class SpinLock
