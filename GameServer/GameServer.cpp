@@ -13,6 +13,48 @@
 
 #include <future>
 
+int32 buffer[10000][10000];
+
+int main()
+{
+	memset(buffer, 0, sizeof(buffer));
+
+	// 빠름
+	{
+		uint64 start = GetTickCount64();
+
+		int64 sum = 0;
+		for (int32 i = 0; i < 10000; i++)
+			for (int32 j = 0; j < 10000; j++)
+				sum += buffer[i][j]; //일련의 데이터에서 한칸씩 이동
+
+		uint64 end = GetTickCount64();
+
+		cout << "Elapsed Tick" << (end - start) << endl;
+
+	}
+
+	// 더 느림
+	{
+		uint64 start = GetTickCount64();
+
+		int64 sum = 0;
+		for (int32 i = 0; i < 10000; i++)
+			for (int32 j = 0; j < 10000; j++)
+				sum += buffer[j][i];
+
+		uint64 end = GetTickCount64();
+
+		cout << "Elapsed Tick" << (end - start) << endl;
+
+	}
+
+	// 데이터 하나를 불러올 때, 인접데이터도 함께 캐시에 등록 (special locality)
+	// 캐시에 있는 데이터를 불러올 때, 캐시 히트가 되며, 캐시 히트가 되면 메모리에서까지 데이터를 불러올 필요 없음
+}
+
+/*
+
 int64 result;
 
 int64 Calculate()
@@ -113,6 +155,7 @@ int main()
 	// 3) packaged_task
 	// 원하는 함수의 실행 결과를 packaged_task를 통해 future로 받아줌
 }
+*/
 
 /*
 mutex m;
