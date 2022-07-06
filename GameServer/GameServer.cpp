@@ -13,8 +13,44 @@
 
 #include <future>
 
-//Thread Local Storage
+//Lock-Based Stack/Queue
 
+queue<int32> q;
+stack<int32> s;
+
+void Push()
+{
+	while (true)
+	{
+		int32 value = rand() % 100;
+		q.push(value);
+	}
+}
+
+void Pop()
+{
+	while (true)
+	{
+		if (q.empty())
+			continue;
+
+		int32 data = q.front();
+		q.pop();
+		cout << data << endl;
+	}
+}
+
+int main()
+{
+	thread t1(Push);
+	thread t2(Pop);
+
+	t1.join();
+	t2.join();
+}
+
+//Thread Local Storage
+/*
 //__declspec(thread) int32 value;
 thread_local int32 LThreadId = 0;
 //thread_local queue<int32> q;
@@ -43,7 +79,7 @@ int main()
 	for (thread& t : threads)
 		t.join();
 }
-
+*/
 /*
 int main()
 {
