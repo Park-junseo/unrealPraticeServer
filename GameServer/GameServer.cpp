@@ -14,6 +14,18 @@
 #include <future>
 
 
+int main()
+{
+	atomic<bool> flag = false;
+
+	bool lockFree = flag.is_lock_free();
+	//0: lock 필요함
+	//1: 이미 원자적으로 처리하므로 lock 필요없음
+
+
+}
+
+/*
 
 int32 x = 0;
 int32 y = 0;
@@ -62,7 +74,7 @@ int main()
 
 	cout << count << " 번만에 빠져나옴ㅎㅎ" << endl;
 }
-
+*/
 /*
 int32 buffer[10000][10000];
 
