@@ -13,6 +13,57 @@
 
 #include <future>
 
+
+
+int32 x = 0;
+int32 y = 0;
+int32 r1 = 0;
+int32 r2 = 0;
+volatile bool ready;
+
+void Thread_1()
+{
+	while (!ready)
+		;
+	y = 1; //Store y
+	r1 = x; //Load x
+}
+
+void Thread_2()
+{
+	while (!ready)
+		;
+	x = 1; //Store x
+	r2 = y; //Load y
+}
+
+int main()
+{
+	int32 count = 0;
+	
+	while (true)
+	{
+		ready = false;
+		count++;
+
+		x = y = r1 = r2 = 0;
+
+		thread t1(Thread_1);
+		thread t2(Thread_2);
+
+		ready = true;
+
+		t1.join();
+		t2.join();
+
+		if (r1 == 0 && r2 == 0)
+			break;
+	}
+
+	cout << count << " 번만에 빠져나옴ㅎㅎ" << endl;
+}
+
+/*
 int32 buffer[10000][10000];
 
 int main()
@@ -52,6 +103,9 @@ int main()
 	// 데이터 하나를 불러올 때, 인접데이터도 함께 캐시에 등록 (special locality)
 	// 캐시에 있는 데이터를 불러올 때, 캐시 히트가 되며, 캐시 히트가 되면 메모리에서까지 데이터를 불러올 필요 없음
 }
+
+*/
+
 
 /*
 
