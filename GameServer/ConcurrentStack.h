@@ -218,3 +218,115 @@ private:
 	atomic<uint32> _popCount = 0; //Pop을 실행중인 쓰레드 개수
 	atomic<Node*> _pendingList; // 삭제되어야 할 노드들 (첫번째 노드)
 };
+
+//shared_ptr 이 애초에 lock free가 되지 못함
+//template<typename T>
+//class LockFreeSmartStack
+//{
+//	struct Node
+//	{
+//		Node(const T& value) : data(make_shared<T>(value)), next(nullptr)
+//		{
+//
+//		}
+//
+//		shared_ptr<T> data;
+//		shared_ptr<Node> next;
+//	};
+//public:
+//	void Push(const T& value)
+//	{
+//		shared_ptr<Node> node = make_shared<Node>(value);
+//		node->next = std::atomic_load(&_head); //꺼내올 때 레퍼런스 카운터를 1 증가시킨 상태에서 해당 포인터를 건내줘야 함
+//		while (std::atomic_compare_exchange_weak(&_head, &node->next, node) == false)
+//		{
+//
+//		}
+//	}
+//
+//	shared_ptr<T> TryPop()
+//	{
+//		shared_ptr<Node> oldHead = std::atomic_load(&_head); //레퍼런스증감과 적재를 한번에 해야함
+//
+//		while (oldHead && std::atomic_compare_exchange_weak(&_head, &oldHead, oldHead->next) == false)
+//		{
+//
+//		}
+//
+//		if (oldHead == nullptr) 
+//			return shared_ptr<T>();
+//
+//		return oldHead->data;
+//	}
+//
+//private:
+//	shared_ptr<Node> _head;
+//};
+
+template<typename T>
+class LockFreeSmartStack
+{
+	struct Node;
+
+	struct CountedNodePtr
+	{
+		int32 externalCount = 0;
+		Node* ptr = nullptr;
+	};
+
+	struct Node
+	{
+		Node(const T& value) : data(make_shared<T>(value))
+		{
+
+		}
+
+		shared_ptr<T> data;
+		atomic<int32> internalCount = 0;
+		CountedNodePtr next;
+	};
+public:
+	void Push(const T& value)
+	{
+		CountedNodePtr node;
+		node.ptr = new Node(value);
+		node.externalCount = 1;
+		//[1]
+		node.ptr->next = _head;
+		while (_head.compare_exchange_weak(node.ptr->next, node) == false)
+		{
+
+		}
+	}
+
+	shared_ptr<T> TryPop()
+	{
+		CountedNodePtr oldHead = _head;
+		while (true)
+		{
+			//참조권 획득
+			IncreaseHeadCount(oldHead);
+		}
+	}
+
+private:
+
+	void IncreaseHeadCount(CountedNodePtr& oldCounter)
+	{
+		//멀티 쓰레드 환경에서 경합이 일어나는데, while 문 아래의 코드를 모두 실행하여 참조권을 획득할 때까지 반복함
+		while (true)
+		{
+			CountedNodePtr newCounter = oldCounter;
+			newCounter.externalCount++;
+
+			if (_head.compare_exchange_strong(oldCounter, newCounter))
+			{
+				oldCounter.externalCount = newCounter.externalCount;
+				break;
+			}
+		}
+	}
+
+private:
+	atomic<CountedNodePtr> _head;
+};

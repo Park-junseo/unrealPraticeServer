@@ -21,6 +21,7 @@
 LockQueue<int32> q;
 LockStack<int32> s;
 LockFreeStack<int32> fs;
+LockFreeSmartStack<int32> ss;
 
 void Push()
 {
@@ -28,7 +29,8 @@ void Push()
 	{
 		int32 value = rand() % 100;
 		//q.Push(value);
-		fs.Push(value);
+		//fs.Push(value);
+		ss.Push(value);
 
 		this_thread::sleep_for(10ms);
 	}
@@ -42,9 +44,12 @@ void Pop()
 		
 		//if(q.TryPop(OUT data))
 		//	cout << data << endl;
-
+/*
 		if (fs.TryPop(OUT data))
-			cout << data << endl;
+			cout << data << endl*/;
+		auto smartData = ss.TryPop();
+		if (smartData != nullptr)
+			cout << (*smartData) << endl;
 	}
 }
 
