@@ -20,15 +20,17 @@
 
 LockQueue<int32> q;
 LockStack<int32> s;
+LockFreeStack<int32> fs;
 
 void Push()
 {
 	while (true)
 	{
 		int32 value = rand() % 100;
-		q.Push(value);
+		//q.Push(value);
+		fs.Push(value);
 
-		this_thread::sleep_for(10ms);
+		//this_thread::sleep_for(10ms);
 	}
 }
 
@@ -38,7 +40,10 @@ void Pop()
 	{
 		int32 data = 0;
 		
-		if(q.TryPop(OUT data))
+		//if(q.TryPop(OUT data))
+		//	cout << data << endl;
+
+		if (fs.TryPop(OUT data))
 			cout << data << endl;
 	}
 }
