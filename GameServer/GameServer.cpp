@@ -30,7 +30,7 @@ void Push()
 		//q.Push(value);
 		fs.Push(value);
 
-		//this_thread::sleep_for(10ms);
+		this_thread::sleep_for(10ms);
 	}
 }
 
