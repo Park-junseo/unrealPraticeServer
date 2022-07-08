@@ -306,6 +306,35 @@ public:
 		{
 			//참조권 획득
 			IncreaseHeadCount(oldHead);
+			//최소한 externalCount >= 2 일테니 삭제X (안전하게 접근할 수 있는 상태)
+			Node* ptr = oldHead.ptr;
+
+			//데이터 없음
+			if (ptr == nullptr)
+				return shared_ptr<T>();
+
+			//소유권 획득 (ptr->next로 head를 바꿔치기 한 애가 이김)
+			//여기에서 다른 쓰레드로 인해 count 값이 바뀌면 실패
+			if (_head.compare_exchange_strong(oldHead, ptr->next))
+			{
+				shared_ptr<T> res;
+				res.swap(ptr->data);
+
+				//external : 1 -> 2(나+1) -> 4(나+1 남+2)
+				//internal : 1 -> 0
+				const int32 countIncrease = oldHead.externalCount - 2;
+
+				if (ptr->internalCount.fetch_add(countIncrease) == -countIncrease)
+					delete ptr;
+
+				return res;
+			}
+			else if (ptr->internalCount.fetch_sub(1) == 1)
+			{
+				//참조권은 얻었으나, 소유권은 실패 -> 뒷수습은 내가 한다
+				delete ptr;
+			}
+
 		}
 	}
 
