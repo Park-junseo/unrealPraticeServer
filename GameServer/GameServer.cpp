@@ -13,10 +13,13 @@
 
 #include <future>
 
-#include "ConcurrentQueue.h"
-#include "ConcurrentStack.h"
+#include "CoreMacro.h"
 
 //Lock-Based Stack/Queue
+/*
+
+#include "ConcurrentQueue.h"
+#include "ConcurrentStack.h"
 
 LockQueue<int32> q;
 LockStack<int32> s;
@@ -44,9 +47,9 @@ void Pop()
 		
 		//if(q.TryPop(OUT data))
 		//	cout << data << endl;
-/*
-		if (fs.TryPop(OUT data))
-			cout << data << endl*/;
+
+		//if (fs.TryPop(OUT data))
+		//	cout << data << endl;
 		auto smartData = ss.TryPop();
 		if (smartData != nullptr)
 			cout << (*smartData) << endl;
@@ -61,6 +64,7 @@ int main()
 	t1.join();
 	t2.join();
 }
+*/
 
 //Thread Local Storage
 /*
