@@ -6,15 +6,45 @@
 #include <atomic>
 #include <mutex>
 
-#include "AccountManager.h"
-#include "UserManager.h"
-
 #include <Windows.h>
 
 #include <future>
 
 #include "ThreadManager.h"
 
+#include "PlayerManager.h"
+#include "LAccountManager.h"
+
+
+
+int main()
+{
+
+	GThreadManager->Launch([=]
+		{
+			while (true)
+			{
+				cout << "PlayerThenAccount" << endl;
+				GPlayerManager.PlayerThenAccount();
+				this_thread::sleep_for(100ms);
+			}
+		});
+
+	GThreadManager->Launch([=]
+		{
+			while (true)
+			{
+				cout << "AccountThenPlayer" << endl;
+				GAccountManager.AccountThenPlayer();
+				this_thread::sleep_for(100ms);
+			}
+		});
+
+	GThreadManager->Join();
+}
+
+//RW Lock
+/*
 class TestLock
 {
 	USE_LOCK;
@@ -84,6 +114,8 @@ int main()
 
 	GThreadManager->Join();
 }
+
+*/
 
 //Lock-Based Stack/Queue
 /*
@@ -553,6 +585,8 @@ int main()
 */
 
 /*
+#include "AccountManager.h"
+#include "UserManager.h"
 
 void Func1()
 {
