@@ -17,7 +17,7 @@
 #include "ConcurrentStack.h"
 
 //Lock-Based Stack/Queue
-
+/**/
 LockQueue<int32> q;
 LockStack<int32> s;
 LockFreeStack<int32> fs;
