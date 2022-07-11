@@ -34,6 +34,31 @@ public:
 private:
 
 	Atomic<uint32> _lockFlag = EMPTY_FLAG;
+
+	//writeLock의 재귀를 허용하여 writeCount 값을 관리
 	uint16 _writeCount = 0;
 };
 
+/*****************
+	LockGuards
+*****************/
+
+class ReadLockGuard
+{
+public:
+	ReadLockGuard(Lock& lock) : _lock(lock) { _lock.ReadLock(); }
+	~ReadLockGuard() { _lock.ReadUnlock(); }
+
+private:
+	Lock& _lock;
+};
+
+class WriteLockGuard
+{
+public:
+	WriteLockGuard(Lock& lock) : _lock(lock) { _lock.WriteLock(); }
+	~WriteLockGuard() { _lock.WriteUnlock(); }
+
+private:
+	Lock& _lock;
+};

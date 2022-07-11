@@ -6,6 +6,7 @@ ThreadManager* GThreadManager = nullptr;
 
 class CoreGlobal
 {
+public:
 	CoreGlobal()
 	{
 		GThreadManager = new ThreadManager();
