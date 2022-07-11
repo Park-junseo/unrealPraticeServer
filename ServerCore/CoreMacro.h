@@ -4,6 +4,8 @@
 	CRASH
 **************/
 
+#define OUT
+
 #define CRASH(cause)					\
 {										\
 	uint32* crash = nullptr;			\
