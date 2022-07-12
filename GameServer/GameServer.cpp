@@ -14,6 +14,65 @@
 
 #include "RefCounting.h"
 
+using KnightRef = TSharedPtr<class Knight>;
+using InventoryRef = TSharedPtr<class Inventory>;
+
+class Knight : public RefCountable
+{
+public:
+	Knight()
+	{
+		cout << "Knight()" << endl;
+	}
+
+	~Knight()
+	{
+		cout << "~Knight()" << endl;
+	}
+
+	void SetTarget(KnightRef target)
+	{
+		_target = target;
+	}
+
+	KnightRef _target = nullptr;
+	InventoryRef _inventory = nullptr;
+};
+
+class Inventory : public RefCountable
+{
+public:
+	Inventory(KnightRef knight) : _knight(**knight) //레퍼런스 카운터를 증가시키지 않고 참조
+	{
+		auto type1 = *knight;
+		auto type2 = **knight;
+	}
+
+	Knight& _knight;
+};
+
+int main()
+{
+	// 1) 이미 만들어진 클래스 대상으로 사용 불가
+	// 2) 순환 (Cycle) 문제
+
+	KnightRef k1(new Knight());
+	k1->ReleaseRef();
+	// 거의 일어나지 않지만, 순환 문제 발생
+	//KnightRef k2(new Knight());
+	//k2->ReleaseRef();
+
+	//k1->SetTarget(k2);
+	//k2->SetTarget(k1);
+
+	//k1 = nullptr;
+	//k2 = nullptr;
+
+	k1->_inventory = new Inventory(k1);
+}
+
+//Reference Counting
+/*
 class Wraight;
 class Missile;
 
@@ -100,6 +159,7 @@ int main()
 	// missile->ReleaseRef();
 	missile = nullptr;
 }
+*/
 
 // 소수 구하기
 /*
