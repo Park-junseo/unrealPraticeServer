@@ -12,7 +12,97 @@
 
 #include "ThreadManager.h"
 
+#include "RefCounting.h"
+
+class Wraight;
+class Missile;
+
+using WraightRef = TSharedPtr<Wraight>;
+using MissileRef = TSharedPtr<Missile>;
+
+class Wraight : public RefCountable
+{
+public:
+	int _hp = 150;
+	int _poxX = 0;
+	int _poxY = 0;
+};
+
+class Missile : public RefCountable
+{
+public:
+	void SetTarget(WraightRef target)
+	{
+		_target = target;
+		// 중간에 개입 가능
+		//target->AddRef();
+		Test(target);
+	}
+
+	//레퍼런스를 넘길 때 비용이 들 수 있으므로 스마트포인터 레퍼런스로 받아옴
+	void Test(WraightRef& target)
+	{
+
+	}
+
+	bool Update()
+	{
+		if (_target == nullptr)
+			return true;
+
+		int posX = _target->_poxX; 
+		//_target이 delete 된 후에도, 그 공간을 계속 참조하여 연산함
+		int posY = _target->_poxY;
+
+		// TODO : 쫓아간다
+
+		if (_target->_hp == 0)
+		{
+			//_target->ReleaseRef();
+			_target = nullptr;
+			return true;
+		}
+
+		return false;
+	}
+
+	WraightRef _target = nullptr;
+};
+
+int main()
+{
+	//Wraight* wraight = new Wraight();
+	//Missile* missile = new Missile();
+	WraightRef wraight(new Wraight());
+	wraight->ReleaseRef(); // 레퍼런스 카운트가 처음 생성될 때 2가 되므로 1로 만듦
+	MissileRef missile(new Missile());
+	missile->ReleaseRef();
+
+	missile->SetTarget(wraight);
+	
+
+	//레이스가 피격 당함
+	wraight->_hp = 0;
+	// delete wraight;
+	// wraight->ReleaseRef();
+	wraight = nullptr; // 복사 연산자 실행
+
+
+	while (true)
+	{
+		if (missile)
+		{
+			missile->Update();
+		}
+	}
+
+	//delete missile;
+	// missile->ReleaseRef();
+	missile = nullptr;
+}
+
 // 소수 구하기
+/*
 #include <vector>
 
 bool IsPrime(int number)
@@ -78,6 +168,7 @@ int main()
 
 	cout << primeCount << endl;
 }
+*/
 
 // DeadLock Profiler
 /*
