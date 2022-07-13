@@ -13,7 +13,87 @@
 #include "ThreadManager.h"
 
 #include "RefCounting.h"
+#include "Memory.h"
 
+class Knight
+{
+public:
+	Knight()
+	{
+		cout << "Knight()" << endl;
+	}
+
+	~Knight() 
+	{
+		cout << "~Knight()" << endl;
+	}
+
+	//static void* operator new(size_t size)
+	//{
+	//	cout << "new! " << size << endl;
+	//	void* ptr = ::malloc(size);
+	//	return ptr;
+	//}
+
+	//static void operator delete(void* ptr)
+	//{
+	//	cout << "delete! " << endl;
+	//	::free(ptr);
+	//}
+
+	//static void* operator new[](size_t size)
+	//{
+	//	cout << "new[]! " << size << endl;
+	//	void* ptr = ::malloc(size);
+	//	return ptr;
+	//}
+
+	//static void operator delete[](void* ptr)
+	//{
+	//	cout << "delete[]! " << endl;
+	//	::free(ptr);
+	//}
+
+	int32 _hp = 100;
+	int32 _mp = 10;
+};
+
+// new operator overloading (Global)
+//void* operator new(size_t size)
+//{
+//	cout << "new! " << size << endl;
+//	void* ptr = ::malloc(size);
+//	return ptr;
+//}
+//
+//void operator delete(void* ptr)
+//{
+//	cout << "delete! " << endl;
+//	::free(ptr);
+//}
+//
+//void* operator new[](size_t size)
+//{
+//	cout << "new[]! " << size << endl;
+//	void* ptr = ::malloc(size);
+//	return ptr;
+//}
+//
+//void operator delete[](void* ptr)
+//{
+//	cout << "delete[]! " << endl;
+//	::free(ptr);
+//}
+
+int main()
+{
+	Knight* knight = xnew<Knight>();
+
+	xdelete(knight);
+}
+
+// 스마트 포인터
+/*
 using KnightRef = TSharedPtr<class Knight>;
 using InventoryRef = TSharedPtr<class Inventory>;
 
@@ -82,6 +162,7 @@ int main()
 	}
 
 }
+*/
 
 //Reference Counting
 /*
