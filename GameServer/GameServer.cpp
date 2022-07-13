@@ -44,8 +44,7 @@ class Inventory : public RefCountable
 public:
 	Inventory(KnightRef knight) : _knight(**knight) //레퍼런스 카운터를 증가시키지 않고 참조
 	{
-		auto type1 = *knight;
-		auto type2 = **knight;
+
 	}
 
 	Knight& _knight;
@@ -69,6 +68,19 @@ int main()
 	//k2 = nullptr;
 
 	k1->_inventory = new Inventory(k1);
+	//결과: 레퍼런스 카운트: k1 - 1 / inventory - 2
+
+	//shared_ptr<Knight> spr(new Knight());
+	shared_ptr<Knight> spr = make_shared<Knight>();
+	weak_ptr<Knight> wpr = spr;
+
+	bool expired = wpr.expired();
+	shared_ptr<Knight> spr2 = wpr.lock();
+	if (spr2 != nullptr)
+	{
+
+	}
+
 }
 
 //Reference Counting
