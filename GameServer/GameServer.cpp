@@ -15,10 +15,22 @@
 #include "RefCounting.h"
 #include "Memory.h"
 
-class Knight
+class Player
+{
+public:
+	Player() {}
+	virtual ~Player() {}
+};
+
+class Knight : public Player
 {
 public:
 	Knight()
+	{
+		cout << "Knight()" << endl;
+	}
+
+	Knight(int32 hp) : _hp(hp)
 	{
 		cout << "Knight()" << endl;
 	}
@@ -87,9 +99,43 @@ public:
 
 int main()
 {
-	Knight* knight = xnew<Knight>();
+	//Knight* k1 = new Knight();
+	//k1->_hp = 200;
+	//k1->_mp = 50;
+	//delete k1;
+	//k1->_hp = 100;	//잘못된 메모리 접근
+
+	//Player* p = new Player();
+	//Knight* k = static_cast<Knight*>(p);
+	//k->_hp = 200;		//잘못된 멤버변수에 접근
+
+	//// 가상 메모리 기본
+	//int* num = new int;
+	//*num = 100;
+	//int64 address = reinterpret_cast<int64>(&num);
+	//cout << address << endl;
+
+	//int* num2 = reinterpret_cast<int*>(525471840008); //이전 address의 값
+	//*num2 = 200; //접근 거부
+	//delete num;
+
+	//SYSTEM_INFO info;
+	//::GetSystemInfo(&info);
+
+	//info.dwPageSize; // 4KB (0x1000)
+	//info.dwAllocationGranularity; // 64KB (0x1000)
+
+	//Knight* k1 = new Knight();
+	//int* test = (int*)::VirtualAlloc(NULL, 4, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	//*test = 100;
+	//::VirtualFree(test, 0, MEM_RELEASE);
+	//*test = 200;
+
+	Knight* knight = xnew<Knight>(100);
 
 	xdelete(knight);
+
+	knight->_hp = 100;
 }
 
 // 스마트 포인터
