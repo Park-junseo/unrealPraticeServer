@@ -32,6 +32,46 @@ public:
 
 	Knight(int32 hp) : _hp(hp)
 	{
+		cout << "Knight(hp)" << endl;
+	}
+
+	~Knight()
+	{
+		cout << "~Knight()" << endl;
+	}
+
+	int32 _hp = 100;
+	int32 _mp = 10;
+};
+
+int main()
+{
+	xVector<Knight> v(100);
+	
+	xMap<int32, Knight> m;
+	m[100] = Knight();
+
+}
+
+// Allocator & StompAllocator
+/*
+class Player
+{
+public:
+	Player() {}
+	virtual ~Player() {}
+};
+
+class Knight : public Player
+{
+public:
+	Knight()
+	{
+		cout << "Knight()" << endl;
+	}
+
+	Knight(int32 hp) : _hp(hp)
+	{
 		cout << "Knight()" << endl;
 	}
 
@@ -137,6 +177,7 @@ int main()
 
 	knight->_hp = 100;
 }
+*/
 
 // 스마트 포인터
 /*
