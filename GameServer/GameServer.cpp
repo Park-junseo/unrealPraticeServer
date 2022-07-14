@@ -15,6 +15,35 @@
 #include "RefCounting.h"
 #include "Memory.h"
 
+// Memory Pool #2
+
+#include "ConcurrentStack.h"
+
+class Data // : public SListEntry
+{
+public:
+	SListEntry _entry;
+
+	int32 _hp;
+	int32 _mp;
+};
+
+int main()
+{
+	SListHeader header;
+	InitializeHead(&header);
+
+	Data* data = new Data();
+	data->_hp = 10;
+	data->_mp = 20;
+
+	PushEntrySList(&header, (SListEntry*)data); //data가 SListEntry를 포함하므로 포인터 치환이 가능하다
+
+	Data* popData = (Data*)PopEntrySList(&header);
+}
+
+// Memory Pool #1
+/*
 class Player
 {
 public:
@@ -63,7 +92,7 @@ int main()
 
 	GThreadManager->Join();
 }
-
+*/
 // STLAllocator
 /*
 int main()
