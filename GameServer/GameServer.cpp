@@ -46,13 +46,35 @@ public:
 
 int main()
 {
+	for (int32 i = 0; i < 5; i++) {
+		GThreadManager->Launch([]()
+			{
+				while (true)
+				{
+					xVector<Knight> v(100);
+					
+					xMap<int32, Knight> m;
+					m[100] = Knight();
+
+					this_thread::sleep_for(10ms);
+				}
+			});
+	}
+
+	GThreadManager->Join();
+}
+
+// STLAllocator
+/*
+int main()
+{
 	xVector<Knight> v(100);
 	
 	xMap<int32, Knight> m;
 	m[100] = Knight();
 
 }
-
+*/
 // Allocator & StompAllocator
 /*
 class Player
