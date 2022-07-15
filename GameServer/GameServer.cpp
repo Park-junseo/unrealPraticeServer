@@ -19,27 +19,80 @@
 
 #include "ConcurrentStack.h"
 
-class Data // : public SListEntry
-{
-public:
-	SListEntry _entry;
+//class Data // : public SListEntry
+//{
+//public:
+//	SListEntry _entry;
+//
+//	int32 _hp;
+//	int32 _mp;
+//};
 
-	int32 _hp;
-	int32 _mp;
+class Data
+{
+	
+public:
+	SListEntry _n;
+	int64 _rand = rand() % 1000;
 };
+
+SListHeader* GHeader;
 
 int main()
 {
-	SListHeader header;
-	InitializeHead(&header);
+	//SListHeader header;
+	//InitializeHead(&header);
 
-	Data* data = new Data();
-	data->_hp = 10;
-	data->_mp = 20;
+	//Data* data = new Data();
+	//data->_hp = 10;
+	//data->_mp = 20;
 
-	PushEntrySList(&header, (SListEntry*)data); //data가 SListEntry를 포함하므로 포인터 치환이 가능하다
+	//PushEntrySList(&header, (SListEntry*)data); //data가 SListEntry를 포함하므로 포인터 치환이 가능하다
 
-	Data* popData = (Data*)PopEntrySList(&header);
+	//Data* popData = (Data*)PopEntrySList(&header);
+
+	GHeader = new SListHeader();
+	ASSERT_CRASH(((uint64)GHeader % 16) == 0);
+	InitializeHead(GHeader);
+
+	for (int32 i = 0; i < 3; i++)
+	{
+		GThreadManager->Launch([]()
+			{
+				while (true)
+				{
+					Data* data = new Data();
+					ASSERT_CRASH(((uint64)data % 16) == 0);
+
+					PushEntrySList(GHeader, (SListEntry*)data);
+					this_thread::sleep_for(10ms);
+				}
+			});
+	}
+
+	for (int32 i = 0; i < 2; i++)
+	{
+		GThreadManager->Launch([]()
+			{
+				while (true)
+				{
+					Data* pop = new Data();
+					pop = (Data*)PopEntrySList(GHeader);
+
+					if (pop)
+					{
+						cout << pop->_rand << endl;
+						delete pop;
+					}
+					else
+					{
+						cout << "NONE" << endl;
+					}
+				}
+			});
+	}
+
+	GThreadManager->Join();
 }
 
 // Memory Pool #1

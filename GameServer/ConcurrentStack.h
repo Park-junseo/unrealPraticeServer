@@ -406,14 +406,35 @@ SListEntry* PopEntrySList(SListHeader* header);
 // 3차 시도
 // ----------------
 
+DECLSPEC_ALIGN(16) //16바이트 정렬
 struct SListEntry
 {
 	SListEntry* next;
 };
 
+DECLSPEC_ALIGN(16)
 struct SListHeader
 {
-	SListEntry* next = nullptr;
+	SListHeader()
+	{
+		alignment = 0;
+		region = 0;
+	}
+	union
+	{
+		struct
+		{
+			uint64 alignment;
+			uint64 region;
+		} DUMMYSTRUCTNAME;
+		struct
+		{
+			uint64 depth : 16;
+			uint64 sequence : 48;
+			uint64 reserved : 4;
+			uint64 next : 60;
+		} HeaderX64;
+	};
 };
 
 void InitializeHead(SListHeader* header);
