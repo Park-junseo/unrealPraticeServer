@@ -15,8 +15,89 @@
 #include "RefCounting.h"
 #include "Memory.h"
 
-// Memory Pool #2
 
+//Memory Pool #3
+
+class Knight
+{
+public:
+	int32 _hp = rand() % 1000;
+};
+
+int main()
+{
+	for (int32 i = 0; i < 5; i++)
+	{
+		GThreadManager->Launch([]()
+			{
+				while (true)
+				{
+					Knight* knight = xnew<Knight>();
+					cout << knight->_hp << endl;
+					this_thread::sleep_for(10ms);
+					xdelete(knight);
+				}
+			});
+	}
+}
+
+//class Data
+//{
+//public:
+//	SLIST_ENTRY entry;
+//	int64 _rand = rand() % 1000;
+//};
+//
+//SLIST_HEADER* GHeader;
+//
+//int main()
+//{
+//	GHeader = new SLIST_HEADER();
+//	ASSERT_CRASH(((uint64)GHeader % 16) == 0);
+//	::InitializeSListHead(GHeader);
+//
+//	for (int32 i = 0; i < 3; i++)
+//	{
+//		GThreadManager->Launch([]()
+//			{
+//				while (true)
+//				{
+//					Data* data = new Data();
+//					ASSERT_CRASH(((uint64)data % 16) == 0);
+//
+//					::InterlockedPushEntrySList(GHeader, (SLIST_ENTRY*)data);
+//					this_thread::sleep_for(10ms);
+//				}
+//			});
+//	}
+//
+//	for (int32 i = 0; i < 2; i++)
+//	{
+//		GThreadManager->Launch([]()
+//			{
+//				while (true)
+//				{
+//					Data* pop = new Data();
+//					pop = (Data*)::InterlockedPopEntrySList(GHeader);
+//
+//					if (pop)
+//					{
+//						cout << pop->_rand << endl;
+//						delete pop;
+//					}
+//					else
+//					{
+//						cout << "NONE" << endl;
+//					}
+//				}
+//			});
+//	}
+//
+//	GThreadManager->Join();
+//}
+
+// Memory Pool #2
+/*
 #include "ConcurrentStack.h"
 
 //class Data // : public SListEntry
@@ -94,6 +175,7 @@ int main()
 
 	GThreadManager->Join();
 }
+*/
 
 // Memory Pool #1
 /*
