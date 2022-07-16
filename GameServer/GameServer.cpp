@@ -24,8 +24,36 @@ public:
 	int32 _hp = rand() % 1000;
 };
 
+class Monster
+{
+public:
+	int32 _id = 0;
+};
+
 int main()
 {
+	Knight* knights[100];
+
+	for (int32 i = 0; i < 100; i++)
+	{
+		knights[i] = ObjectPool<Knight>::Pop();
+	}
+
+	for (int32 i = 0; i < 100; i++)
+	{
+		ObjectPool<Knight>::Push(knights[i]);
+		knights[i] = nullptr;
+	}
+
+	//Knight* k = ObjectPool<Knight>::Pop();
+	//ObjectPool<Knight>::Push(k);
+	// ## delete k 등으로 데이터가 직접 지워질 수 있음
+	// ## 그러므로 따로 관리함
+
+	// shared_ptr<Knight> sptr = { ObjectPool<Knight>::Pop() , ObjectPool<Knight>::Push };
+	shared_ptr<Knight> sptr = ObjectPool<Knight>::MakeShared();
+	shared_ptr<Knight> sptr2 = MakeShared<Knight>();
+
 	for (int32 i = 0; i < 5; i++)
 	{
 		GThreadManager->Launch([]()

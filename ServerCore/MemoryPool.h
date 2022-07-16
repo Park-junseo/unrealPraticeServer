@@ -49,7 +49,8 @@ public:
 private:
 	SLIST_HEADER	_header;
 	int32			_allocSize = 0;
-	atomic<int32>	_allocCount = 0; //메모리 풀에서 뱉어 준 메모리 개수
+	atomic<int32>	_useCount = 0; //메모리 풀에서 뱉어 준 메모리 개수
+	atomic<int32>	_reserveCount = 0;
 
 	// SLIST_HEADER를 사용하여 MomoryHeader 관리
 	//USE_LOCK;
