@@ -15,9 +15,56 @@
 #include "RefCounting.h"
 #include "Memory.h"
 
+#include "TypeCast.h"
+
+class Player
+{
+
+};
+
+class Knight : public Player
+{
+
+};
+
+class Mage : public Player
+{
+
+};
+
+class Archer : public Player
+{
+
+};
+
+class Dog
+{
+
+};
+
+int main()
+{
+	TypeList<Mage, TypeList<Knight, Archer>>::Tail::Tail player;
+
+	int32 len1 = Length<TypeList<Mage, Knight, Archer>>::value;
+
+	using TL = TypeList<Mage, Knight, Archer>;
+
+	TypeAt<TL, 2>::Result type2;
+	TypeAt<TL, 0>::Result type0;
+
+	int32 indexMage = IndexOf<TL, Mage>::value;
+	int32 indexKnight = IndexOf<TL, Knight>::value;
+	int32 indexDog = IndexOf<TL, Dog>::value;
+
+	bool exist1 = Conversion<Knight, Player>::exists;
+	bool exist2 = Conversion<Player, Knight>::exists;
+	bool exist3 = Conversion<Knight, Dog>::exists;
+
+}
 
 //Memory Pool #3
-
+/*
 class Knight
 {
 public:
@@ -68,7 +115,7 @@ int main()
 			});
 	}
 }
-
+*/
 //class Data
 //{
 //public:
