@@ -86,6 +86,33 @@ int main()
 		cout << "Client Connected! IP = " << ipAddress << endl;
 
 		// TODO
+		while (true)
+		{
+			// 클라이언트에서 보내는 버퍼의 크기를 알기 어려움으로 넉넉하게 공간을 잡음
+			char recvBuffer[1000];
+
+			this_thread::sleep_for(1s);
+
+			int32 recvLen = ::recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
+			if (recvLen <= 0)
+			{
+				int32 errCode = ::WSAGetLastError();
+				cout << "Recv ErrorCode : " << errCode << endl;
+				return 0;
+			}
+
+			cout << "Recv Data! Data = " << recvBuffer << endl;
+			cout << "Recv Data! Len = " << recvLen << endl;
+
+			// 소켓에 전송할 버퍼와 크기를 송신
+			int32 resultCode = ::send(clientSocket, recvBuffer, recvLen, 0);
+			if (resultCode == SOCKET_ERROR)
+			{
+				int32 errCode = ::WSAGetLastError();
+				cout << "Send ErrorCode : " << errCode << endl;
+				return 0;
+			}
+		}
 	}
 
 	// --------------------
