@@ -15,31 +15,57 @@
 #include "RefCounting.h"
 #include "Memory.h"
 
-#include "TypeCast.h"
+using TL = TypeList<class Player, class Mage, class Knight, class Archer>;
 
 class Player
 {
-
+public:
+	Player()
+	{
+		INIT_TL(Player)
+	}
+	virtual void MyType()
+	{
+		cout << "Player" << endl;
+	}
+	DECLARE_TL;
 };
 
 class Knight : public Player
 {
-
+public:
+	Knight() {INIT_TL(Knight) }
+	void MyType()
+	{
+		cout << "Knight" << endl;
+	}
+	int32 stack[10];
 };
 
 class Mage : public Player
 {
-
+public:
+	Mage() {INIT_TL(Mage) }
+	void MyType()
+	{
+		cout << "Mage" << endl;
+	}
 };
 
 class Archer : public Player
 {
-
+public:
+	Archer() {INIT_TL(Archer) }
+	void MyType()
+	{
+		cout << "Archer" << endl;
+	}
 };
 
 class Dog
 {
-
+public:
+	//Dog() {INIT_TL(Dog) }
 };
 
 int main()
@@ -47,8 +73,6 @@ int main()
 	TypeList<Mage, TypeList<Knight, Archer>>::Tail::Tail player;
 
 	int32 len1 = Length<TypeList<Mage, Knight, Archer>>::value;
-
-	using TL = TypeList<Mage, Knight, Archer>;
 
 	TypeAt<TL, 2>::Result type2;
 	TypeAt<TL, 0>::Result type0;
@@ -61,6 +85,32 @@ int main()
 	bool exist2 = Conversion<Player, Knight>::exists;
 	bool exist3 = Conversion<Knight, Dog>::exists;
 
+	TypeConversion<TL> test;
+
+	test.s_convert;
+
+	{
+		Player* player = new Knight();
+
+		bool canCast = CanCast<Knight*>(player);
+		Knight* knight = TypeCast<Knight*>(player);
+
+		cout << (canCast ? "true" : "false") << sizeof(*knight) << endl;
+		knight->MyType();
+	}
+	{
+		Knight* player = new Knight();
+
+		bool canCast = CanCast<Player*>(player);
+		Player* knight = TypeCast<Player*>(player);
+
+		cout << (canCast ? "true" : "false") << endl;
+		knight->MyType();
+	}
+	{
+		shared_ptr<Knight> knight = MakeShared<Knight>();
+		shared_ptr<Player> player = TypeCast<Player>(knight);
+	}
 }
 
 //Memory Pool #3

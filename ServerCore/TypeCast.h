@@ -56,6 +56,7 @@ template <typename Head, typename... Tail, int32 index>
 struct TypeAt<TypeList<Head, Tail...>, index>
 {
 	using Result = typename TypeAt<TypeList<Tail...>, index - 1>::Result;
+	// typename 인자: 컴파일러에게 값이 아닌 타입으로 지정
 };
 
 #pragma endregion
