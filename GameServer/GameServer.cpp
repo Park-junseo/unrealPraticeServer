@@ -12,6 +12,90 @@
 
 #include "ThreadManager.h"
 
+#include <WinSock2.h>
+#include <MSWSock.h>
+#include <WS2tcpip.h>
+#pragma comment(lib, "ws2_32.lib")
+
+int main()
+{
+	// 원속 초기화 (ws2_32 라이브러리 초기화)
+	// 관련 정보가 wsaData에 채워짐
+	WSAData wsaData;
+	if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+		return 0;
+
+	// ad : Address Family (AF_INET = IPv4, AF_INET6 = IPv6)
+	// type : TCP(SOCK_STREAM) vs UDP(SOCK_DGRAM)
+	// protocol : 0
+	// return : descriptor
+	// SOKET은 socket 함수로 할당된 소켓 리소스 번호
+	SOCKET listenSocket = ::socket(AF_INET, SOCK_STREAM, 0);
+	if (listenSocket == INVALID_SOCKET)
+	{
+		int32 errCode = ::WSAGetLastError(); // 어떤 이유로 안되는지 에러 코드를 받아옴
+		cout << "Soket ErrorCode : " << errCode << endl;
+		return 0;
+	}
+
+	// 나의 주소는?: IP주소 + Port
+	SOCKADDR_IN serverAddr; // IPv4 구조체
+	::memset(&serverAddr, 0, sizeof(serverAddr)); // 구조체 초기화
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_addr.s_addr = ::htonl(INADDR_ANY); // 자신의 아이피로 알아서 지정
+	serverAddr.sin_port = ::htons(7777); //포트의 임의 번호 지정/ 일부포트는 예약되어 있음
+
+	// 안내원 연결
+	if (::bind(listenSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) //서버와 소켓을 연동
+	{
+		int32 errCode = ::WSAGetLastError(); // 어떤 이유로 안되는지 에러 코드를 받아옴
+		cout << "Bind ErrorCode : " << errCode << endl;
+		return 0;
+	}
+
+	// 영업 시작
+	if (::listen(listenSocket, 10) == SOCKET_ERROR) //10: 백로그, 대기열 한도, 대기열을 넘을 시 접근 거부
+	{
+		int32 errCode = ::WSAGetLastError(); // 어떤 이유로 안되는지 에러 코드를 받아옴
+		cout << "Listen ErrorCode : " << errCode << endl;
+		return 0;
+	}
+
+	// --------------------
+	// 통과
+
+	while (true)
+	{
+		// 자신에게 연결하는 클라이언트 주소
+		SOCKADDR_IN clientAddr; // IPv4
+		::memset(&clientAddr, 0, sizeof(clientAddr)); // 구조체 초기화
+		int32 addrLen = sizeof(clientAddr);
+		// 자신에게 연결한 클라이언트의 주소를 넘김
+		// listenSocket 은 처음 클라이언트가 연결할 떄만 사용되고, 나머지 통신은 clientSocket에서 처리함
+		SOCKET clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr,&addrLen);
+		if (clientSocket == INVALID_SOCKET)
+		{
+			int32 errCode = ::WSAGetLastError(); // 어떤 이유로 안되는지 에러 코드를 받아옴
+			cout << "Accept ErrorCode : " << errCode << endl;
+			return 0;
+		}
+
+		// 손님 임장!
+		char ipAddress[16];
+		::inet_ntop(AF_INET, &clientAddr.sin_addr, ipAddress, sizeof(ipAddress));
+		cout << "Client Connected! IP = " << ipAddress << endl;
+
+		// TODO
+	}
+
+	// --------------------
+
+	// 원속 종료
+	::WSACleanup();
+}
+
+//TypeCast
+/*
 #include "RefCounting.h"
 #include "Memory.h"
 
@@ -112,6 +196,7 @@ int main()
 		shared_ptr<Player> player = TypeCast<Player>(knight);
 	}
 }
+*/
 
 //Memory Pool #3
 /*
