@@ -21,6 +21,30 @@ int main()
 	SOCKET clientSocket = ::socket(AF_INET, SOCK_DGRAM, 0);
 	if (clientSocket == INVALID_SOCKET)
 	{
+		HandleError("Socket");
+		return 0;
+	}
+
+
+
+	// 소켓 리소스 반환
+	::closesocket(clientSocket);
+
+	// 원속 종료
+	::WSACleanup();
+}
+
+// UDP
+/*
+int main()
+{
+	WSAData wsaData;
+	if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+		return 0;
+
+	SOCKET clientSocket = ::socket(AF_INET, SOCK_DGRAM, 0);
+	if (clientSocket == INVALID_SOCKET)
+	{
 		int32 errCode = ::WSAGetLastError(); // 어떤 이유로 안되는지 에러 코드를 받아옴
 		cout << "Soket ErrorCode : " << errCode << endl;
 		return 0;
@@ -98,7 +122,7 @@ int main()
 	// 원속 종료
 	::WSACleanup();
 }
-
+*/
 //TCP
 /*
 int main()
