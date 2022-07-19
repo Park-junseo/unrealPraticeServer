@@ -67,7 +67,7 @@ int main()
 	// SD_SEN :send 막음
 	// SD_RECEIVE : recv 막음
 	// SD_BOTH : 둘다 반환
-	// closesocket 대신, 저오
+	// closesocket 대신, 적용
 	//::shutdown(serverSocket, SD_SEND);
 
 	// 소켓 리소스 반환
@@ -98,7 +98,7 @@ int main()
 	}
 
 	// IPPROTO_TCP
-	// TCP_NOELAY = Nagle 네이글 알고리즘 작동 여부
+	// TCP_NODELAY = Nagle 네이글 알고리즘 작동 여부
 	// 데이터가 충분히 크면 보내고, 그렇지 않으면 데이터가 충분히 쌓일 때까지 대기
 	// 장점: 작은 패킷이 불필요하게 많이 생성되는 일을 방지
 	// 단점: 반응 시간 손해
