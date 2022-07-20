@@ -73,6 +73,165 @@ int main()
 
 	cout << "Accept" << endl;
 
+	// WSAEventSelect = (WSAEventSelect 함수가 핵심이 되는, window 함수)
+	// 소켓과 관련된 네트워크 이벤트를 [이벤트 객체]를 통해 감지
+	// select는 동기 방식인데 비해, WSAEventSelect는 이벤트 객체를 통한 비동기 방식
+
+	// 이벤트 객체 관련 함수들
+	// 생성 : WSACreateEvent ( 수동 리셋 Manual-Reset + Non-Signaled 상태 시작)
+	// 삭제 : WSACloseEvent
+	// 신호 상태 감지 : WSAWaitForMultipleEvents
+	// 구체적인 네트워크 이벤트 알아내기 : SWAEnumNetWorkEvents
+	
+	// 소켓 <-> 이벤트 객체 연동
+	// soket을 event를 통해 어떤 networkEvents 상태를 감지하고 싶은지 등록
+	// WSAEventSelect(socket, event, networkEvents); 
+	// 관심 있는 네트워크 이벤트(networkEvents)
+	// FD_ACCEPT : 접속한 클라가 있음 accept
+	// FD_READ : 데이터 수신 가능 recv, recvfrom
+	// FD_WRITE : 데이터 송신 가능 send, sendto,
+	// FD_CLOSE : 상대가 접속 종료
+	// FD_CONNECT : 통신을 위한 연결 절차 완료
+	// FD_OOB :
+
+	// 주의 사항
+	// WSAEventSelect 함수를 호출하면, 해당 소켓은 자동으로 넌블로킹 모드 전환
+	// accept() 함수가 리턴하는 소켓은 listenSocket과 동일한 속성을 갖는다.
+	// - 따라서 clientSocket 은 FD_READ, FD_WRITE 등을 다시 등록 필요
+	// - 드물게 WSAEWOULDBLOCK 오류가 뜰 수 있으니 예외 처리 필요
+	// 중요)
+	// - 이벤트 발생 시, 적절한 소켓 함수 호출해야 함
+	// - 아니면 다음 번에는 동일 네트워크 이벤트 발생 X
+	// ex) FD_READ 이벤트 떳으면 recv() 호출해야 하고, 안하면 FD_READ 두 번 다시 X
+
+	// 1) count, event
+	// 2) waitAll : 모두 기다리기, 하나만 완료 기다리기
+	// 3) timeout : 타임아웃
+	// 4) 지금은 false
+	// WSAWaitForMultipleEvents
+	
+
+	vector<Session> sessions; // Session 관리하는 벡터
+	sessions.reserve(100);
+
+	fd_set reads;
+	fd_set writes;
+
+	while (true)
+	{
+		// 소켓 셋 초기화
+		FD_ZERO(&reads);
+		FD_ZERO(&writes);
+
+		// ListenSocket 등록
+		FD_SET(listenSocket, &reads); // 처음 accept 하기 위해
+
+		// 알맞게 소켓 등록
+		for (Session& s : sessions)
+		{
+			if (s.recvBytes <= s.sendBytes)
+				FD_SET(s.socket, &reads); // 읽고 보내야 하므로
+			else
+				FD_SET(s.socket, &writes);
+		}
+
+		// [옵션] 마지막 timeout 인자 설정 가능
+		// 마지막 인자인 timeval을 넣지 않으면 하나의 set 이라도 준비될 때까지 대기
+		timeval timeout;
+		//timeout.tv_sec;
+		//timeout.tv_usec;
+		int32 retVal = ::select(0, &reads, &writes, nullptr, nullptr);
+		if (retVal == SOCKET_ERROR)
+			break;
+		// select 함수에서 하나라도 준비되면 리턴하며 reads와 writes에서 낙오자는 알아서 제거
+
+
+		// Listener 소켓 체크
+		if (FD_ISSET(listenSocket, &reads))
+		{
+			SOCKADDR_IN clientAddr;
+			int32 addrLen = sizeof(clientAddr);
+			SOCKET clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
+			if (clientSocket != INVALID_SOCKET) //select함수로 실행 가능한 소켓이 있으므로
+			{
+				cout << "Client Connected" << endl;
+				sessions.push_back(Session{ clientSocket });
+			}
+		}
+
+		// listenSocket 이외에 나머지 소켓 체크
+		for (Session& s : sessions)
+		{
+			// Read 체크
+			if (FD_ISSET(s.socket, &reads))
+			{
+				int32 recvLen = ::recv(s.socket, s.recvBuffer, BUFSIZE, 0);
+				if (recvLen <= 0)
+				{
+					// TODO : sessions 제거
+					continue;
+				}
+
+				s.recvBytes = recvLen;
+			}
+
+			// Write 체크
+			if (FD_ISSET(s.socket, &writes))
+			{
+				// 블로킹 모드였을 경우 -> 모든 데이터 다 보냄
+				// 논블로킹 모드 -> 일부만 보낼 수 있음 (상대방 수신 버퍼 상황에 따라) 
+				// 
+				::send(s.socket, &s.recvBuffer[s.sendBytes], s.recvBytes - s.sendBytes, 0);
+			}
+		}
+	}
+
+	// 원속 종료
+	::WSACleanup();
+}
+
+// Select 모델
+/*
+int main()
+{
+	WSAData wsaData;
+	if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+		return 0;
+
+	// 블로킹(Blocking) 소켓
+	// accept -> 접속한 클라가 있을 때
+	// connect -> 서버 접속 성공했을 때
+	// send, sendto -> 요청한 데이터를 송신 버퍼에 복사했을 때
+	// recv, recvfrom -> 수신 버퍼에 도착한 데이터가 있고, 이를 유저레벨 버퍼에 복사했을 떄 성공
+
+	// 논블로킹(Non-Blocking)
+
+	SOCKET listenSocket = ::socket(AF_INET, SOCK_STREAM, 0);
+	if (listenSocket == INVALID_SOCKET)
+	{
+		HandleError("Socket");
+		return 0;
+	}
+
+	u_long on = 1;
+	// 논블로킹 소켓으로 변환
+	if (::ioctlsocket(listenSocket, FIONBIO, &on) == INVALID_SOCKET)
+		return 0;
+
+	SOCKADDR_IN serverAddr;
+	::memset(&serverAddr, 0, sizeof(serverAddr));
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_addr.s_addr = ::htonl(INADDR_ANY);
+	serverAddr.sin_port = ::htons(7777);
+
+	if (::bind(listenSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+		return 0;
+
+	if (::listen(listenSocket, SOMAXCONN) == SOCKET_ERROR)
+		return 0;
+
+	cout << "Accept" << endl;
+
 	// Select 모델 = (select 함수가 핵심이 되는)
 	// 소켓 함수 호출이 성공할 시점을 미리 알 수 있다!
 	// 클라이언트같은 적은 버퍼 환경에서 유용
@@ -174,7 +333,7 @@ int main()
 	// 원속 종료
 	::WSACleanup();
 }
-
+*/
 // non blocking socket
 /*
 int main()
