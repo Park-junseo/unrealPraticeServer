@@ -58,44 +58,40 @@ int main()
 
 	char sendBuffer[100] = "Hello World";
 
+	WSAEVENT wsaEvent = WSACreateEvent();
+	WSAOVERLAPPED overlapped = {};
+	overlapped.hEvent = wsaEvent;
+
 	// Send
 	while (true)
 	{
-		if (::send(clientSocket, sendBuffer, sizeof(sendBuffer), 0) == SOCKET_ERROR)
-		{
-			// 논블록킹이 일어날만한 상황
-			if (::WSAGetLastError() == WSAEWOULDBLOCK)
-				continue;
 
-			//Error
-			break;
+		WSABUF wsaBuf;
+		wsaBuf.buf = sendBuffer;
+		wsaBuf.len = 100;
+
+		DWORD recvLen = 0;
+		DWORD flags = 0;
+
+		if (::WSASend(clientSocket, &wsaBuf, 1, &recvLen, flags, &overlapped, nullptr) == SOCKET_ERROR)
+		{
+			if (::WSAGetLastError() == WSA_IO_PENDING)
+			{
+				// Pending 그리고 대기
+				::WSAWaitForMultipleEvents(1, &wsaEvent, TRUE, WSA_INFINITE, FALSE);
+				// 결과를 가져 옴 
+				::WSAGetOverlappedResult(clientSocket, &overlapped, &recvLen, FALSE, &flags);
+			}
+			else
+			{
+				// TODO : 문제 있는 상황
+				break;
+			}
+
 		}
+
 
 		cout << "Send Data ! Len = " << sizeof(sendBuffer) << endl;
-
-		// Recv
-		while (true)
-		{
-			char recvBuffer[1000];
-			int32 recvLen = ::recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
-			if (recvLen == SOCKET_ERROR)
-			{
-				// 논블록킹이 일어날만한 상황
-				if (::WSAGetLastError() == WSAEWOULDBLOCK)
-					continue;
-
-				//Error
-				break;
-			}
-			else if (recvLen == 0)
-			{
-				// 연결 끊김
-				break;
-			}
-
-			cout << "Recv Data Len = " << recvLen << endl;
-			break;
-		}
 
 		this_thread::sleep_for(1s);
 	}

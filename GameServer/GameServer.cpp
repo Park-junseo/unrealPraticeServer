@@ -150,6 +150,7 @@ int main()
 				else
 				{
 					// TODO : 문제 있는 상황
+					break;
 				}
 					
 			}
