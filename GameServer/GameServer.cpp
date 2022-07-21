@@ -39,14 +39,6 @@ int main()
 	if (::WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
 		return 0;
 
-	// 블로킹(Blocking) 소켓
-	// accept -> 접속한 클라가 있을 때
-	// connect -> 서버 접속 성공했을 때
-	// send, sendto -> 요청한 데이터를 송신 버퍼에 복사했을 때
-	// recv, recvfrom -> 수신 버퍼에 도착한 데이터가 있고, 이를 유저레벨 버퍼에 복사했을 떄 성공
-
-	// 논블로킹(Non-Blocking)
-
 	SOCKET listenSocket = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (listenSocket == INVALID_SOCKET)
 	{
@@ -108,82 +100,30 @@ int main()
 	// 2) waitAll : 모두 기다리기, 하나만 완료 기다리기
 	// 3) timeout : 타임아웃
 	// 4) 지금은 false
+	// return : 완료된 첫번째 인덱스
 	// WSAWaitForMultipleEvents
-	
 
+	// 1) socket
+	// 2) eventObject : socket 과 연동된 이벤트 객체 핸들을 넘겨주면, 이벤트 객체를 non-signaled
+	// 3) networkEvent : 네트워크 이벤트 / 오류 정보가 저장
+	// WSANumNetworkEvents
+	
+	// WSAEVENT와 Session
+	vector<WSAEVENT> wsaEvents;
 	vector<Session> sessions; // Session 관리하는 벡터
 	sessions.reserve(100);
 
-	fd_set reads;
-	fd_set writes;
+	WSAEVENT listenEvent = ::WSACreateEvent;
+	wsaEvents.push_back(listenEvent);
+	// client와 연결되는 소켓은 아니지만, 섹션 벡터와 이벤트 벡터의 인덱스를 같게 하기 위해
+	sessions.push_back(Session{ listenSocket });
+
+	if (::WSAEventSelect(listenSocket, listenEvent, FD_ACCEPT | FD_CLOSE) == SOCKET_ERROR)
+		return 0;
 
 	while (true)
 	{
-		// 소켓 셋 초기화
-		FD_ZERO(&reads);
-		FD_ZERO(&writes);
 
-		// ListenSocket 등록
-		FD_SET(listenSocket, &reads); // 처음 accept 하기 위해
-
-		// 알맞게 소켓 등록
-		for (Session& s : sessions)
-		{
-			if (s.recvBytes <= s.sendBytes)
-				FD_SET(s.socket, &reads); // 읽고 보내야 하므로
-			else
-				FD_SET(s.socket, &writes);
-		}
-
-		// [옵션] 마지막 timeout 인자 설정 가능
-		// 마지막 인자인 timeval을 넣지 않으면 하나의 set 이라도 준비될 때까지 대기
-		timeval timeout;
-		//timeout.tv_sec;
-		//timeout.tv_usec;
-		int32 retVal = ::select(0, &reads, &writes, nullptr, nullptr);
-		if (retVal == SOCKET_ERROR)
-			break;
-		// select 함수에서 하나라도 준비되면 리턴하며 reads와 writes에서 낙오자는 알아서 제거
-
-
-		// Listener 소켓 체크
-		if (FD_ISSET(listenSocket, &reads))
-		{
-			SOCKADDR_IN clientAddr;
-			int32 addrLen = sizeof(clientAddr);
-			SOCKET clientSocket = ::accept(listenSocket, (SOCKADDR*)&clientAddr, &addrLen);
-			if (clientSocket != INVALID_SOCKET) //select함수로 실행 가능한 소켓이 있으므로
-			{
-				cout << "Client Connected" << endl;
-				sessions.push_back(Session{ clientSocket });
-			}
-		}
-
-		// listenSocket 이외에 나머지 소켓 체크
-		for (Session& s : sessions)
-		{
-			// Read 체크
-			if (FD_ISSET(s.socket, &reads))
-			{
-				int32 recvLen = ::recv(s.socket, s.recvBuffer, BUFSIZE, 0);
-				if (recvLen <= 0)
-				{
-					// TODO : sessions 제거
-					continue;
-				}
-
-				s.recvBytes = recvLen;
-			}
-
-			// Write 체크
-			if (FD_ISSET(s.socket, &writes))
-			{
-				// 블로킹 모드였을 경우 -> 모든 데이터 다 보냄
-				// 논블로킹 모드 -> 일부만 보낼 수 있음 (상대방 수신 버퍼 상황에 따라) 
-				// 
-				::send(s.socket, &s.recvBuffer[s.sendBytes], s.recvBytes - s.sendBytes, 0);
-			}
-		}
 	}
 
 	// 원속 종료
