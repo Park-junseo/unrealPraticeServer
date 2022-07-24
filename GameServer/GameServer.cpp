@@ -27,18 +27,27 @@ const int32 BUFSIZE = 1000;
 // 클라이언트가 접속할 떄 Session 구조체로 정보를 관리
 struct Session
 {
+	// Overlapped Model (Base callback)
+	// 구조체 변수를 함수의 매개변수로 넘길 때, 
+	// 넘겨야 하는 타입을 구조체 속성에 첫번째로 두면 캐스팅할 때 구조체의 
+	// 첫번째 타입으로 변환할 수 있고, 함수에서 넘겨받은 구조체 속성으로 
+	// 구조체로 캐스팅하여 사용할 수 있음
+	WSAOVERLAPPED overlapped = {};
+
 	SOCKET socket = INVALID_SOCKET;
 	char recvBuffer[BUFSIZE];
 	int32 recvBytes = 0;
 	int32 sendBytes = 0;
 	// Overlapped Model
-	WSAOVERLAPPED overlapped = {};
+	//WSAOVERLAPPED overlapped = {};
 };
 
 void CALLBACK RecvCallback(DWORD error, DWORD recvLen, LPWSAOVERLAPPED overlapped, DWORD flags)
 {
-	cout << "Data Recv Len Callback = " << recvLen << endl;
+	cout << "Data Recv Len Cal'lback = " << recvLen << endl;
 	// TODO : 에코 서버를 만든다면 WSASend()
+
+	Session* session = (Session*)overlapped;
 }
 
 int main()
@@ -83,6 +92,24 @@ int main()
 	// 3) 비동기 입출력 함수 호출 시 넘겨준 WSAOVERLAPPED 구조체의 주소값
 	// 4) 0
 	//void CompletionRoutine()
+
+	//Select 모델
+	//장점 : 윈도우 / 리눅스 공통
+	//단점 : 성능 최하(매번 등록 비용), 64개 제한
+	//WSAEventSelect 모델
+	//장점 : 비교적 뛰어난 성능
+	//단점 : 64개 제한
+	//Overlapped 모델(이벤트 기반)
+	//장점 : 성능
+	//단점 : 64개 제한
+	//Overlapped 모델(콜백 기반)
+	//장점 : 성능
+	//단점 : 모든 비동기 소켓 함수에서 사용 가능하진 않음(accpet) 빈번한 Alertable Wait로 인한 성능 저하
+	//IOCP 모델
+	//라이브러리에 사용될 모델
+
+	//Rreactor Pattern(-뒤늦게.논블로킹 소켓.소켓 상태 확인 후->뒤늦게 recv send 호출)
+	//Proactor Pattern(-미리 Overlapped WSA - )
 
 	while (true)
 	{
