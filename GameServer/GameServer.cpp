@@ -12,6 +12,28 @@
 
 #include "ThreadManager.h"
 
+#include "SocketUtils.h"
+
+int main()
+{
+	SOCKET socket = SocketUtils::CreateSocket();
+
+	SocketUtils::BindAnyAddress(socket, 7777);
+
+	SocketUtils::Listen(socket);
+
+	SOCKET clientSocket = ::accept(socket, nullptr, nullptr);
+
+	cout << "Clientlp" << endl;
+
+	while (true)
+	{
+
+	}
+}
+
+//Completion Port 모델
+/*
 #include <WinSock2.h>
 #include <MSWSock.h>
 #include <WS2tcpip.h>
@@ -189,7 +211,7 @@ int main()
 	// 원속 종료
 	::WSACleanup();
 }
-
+*/
 // Overlapped 모델 (콜백 기반)
 /*
 struct Session
