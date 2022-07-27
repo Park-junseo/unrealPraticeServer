@@ -24,12 +24,14 @@ int main()
 
 	SOCKET clientSocket = ::accept(socket, nullptr, nullptr);
 
-	cout << "Clientlp" << endl;
+	cout << "Client Connected!" << endl;
 
 	while (true)
 	{
 
 	}
+
+	GThreadManager->Join();
 }
 
 //Completion Port 모델
