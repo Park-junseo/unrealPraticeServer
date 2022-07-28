@@ -4,8 +4,10 @@
 	IocpObject
 -----------------*/
 
-class IocpObject
+class IocpObject : public enable_shared_from_this<IocpObject>
 {
+	// enable_shared_from_this<IocpObject>를 상속할 시
+	//weak_ptr<IocpObject> _Wptr;
 public:
 	virtual HANDLE GetHandle() abstract;
 	// 어떤 일감인지 iocpEvent로 받아옴

@@ -46,9 +46,11 @@ bool Listener::StartAccept(NetAddress netAddress)
 	for (int32 i = 0; i < acceptCount; i++)
 	{
 		AcceptEvent* acceptEvent = xnew<AcceptEvent>();
+		//(X) acceptEvent->owner = shared_ptr<IocpObject>(this); <-- refCounter를 고려하지 않고 새롭게 생성함
+		acceptEvent->owner = shared_from_this(); // 자기 자신에 대한 refCounter를 유지한 채로 shared_ptr 생성
 		_acceptEvents.push_back(acceptEvent);
 		RegisterAccept(acceptEvent);
-	}
+	} 
 	return false;
 }
 
@@ -64,7 +66,8 @@ HANDLE Listener::GetHandle()
 
 void Listener::Dispatch(IocpEvent* iocpEvent, int32 numOfBytes)
 {
-	ASSERT_CRASH(iocpEvent->GetType() == EventType::Accept);
+	//ASSERT_CRASH(iocpEvent->GetType() == EventType::Accept);
+	ASSERT_CRASH(iocpEvent->eventType == EventType::Accept);
 
 	AcceptEvent* acceptEvent = static_cast<AcceptEvent*>(iocpEvent);
 	ProcessAccept(acceptEvent);
@@ -73,10 +76,12 @@ void Listener::Dispatch(IocpEvent* iocpEvent, int32 numOfBytes)
 // accept를 걸어줫 iocp에서 처리할 수 있도록 일감을 호출하여 예약
 void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 {
-	Session* session = xnew<Session>();
+	//Session* session = xnew<Session>();
+	SessionRef session = MakeShared<Session>();
 
 	acceptEvent->Init();
-	acceptEvent->SetSession(session);
+	//acceptEvent->SetSession(session);
+	acceptEvent->session = session;
 
 	DWORD bytesReceived = 0;
 	// 비동기 accept 호출
@@ -94,7 +99,8 @@ void Listener::RegisterAccept(AcceptEvent* acceptEvent)
 // 처음 생성된 accpetEvent를 계속 재사용할 수 있음
 void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 {
-	Session* session = acceptEvent->GetSession();
+	//Session* session = acceptEvent->GetSession();
+	SessionRef session = acceptEvent->session;
 
 	if (false == SocketUtils::SetUpdateAcceptSocket(session->GetSocket(), _socket))
 	{

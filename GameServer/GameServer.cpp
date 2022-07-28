@@ -17,6 +17,27 @@
 
 int main()
 {
+	ListenerRef listener = MakeShared<Listener>();
+	listener->StartAccept(NetAddress(L"127.0.0.1", 7777));
+
+	for (int32 i = 0; i < 5; i++)
+	{
+		GThreadManager->Launch([=]()
+			{
+				while (true)
+				{
+					GIocpCore.Dispatch();
+				}
+			});
+	}
+
+	GThreadManager->Join();
+}
+
+// IocpCore
+/*
+int main()
+{
 	//SOCKET socket = SocketUtils::CreateSocket();
 
 	//SocketUtils::BindAnyAddress(socket, 7777);
@@ -47,7 +68,7 @@ int main()
 
 	GThreadManager->Join();
 }
-
+*/
 //Completion Port 모델
 /*
 #include <WinSock2.h>
