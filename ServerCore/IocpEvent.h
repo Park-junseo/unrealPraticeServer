@@ -1,5 +1,7 @@
 #pragma once
 
+class Session;
+
 enum class EventType : uint8
 {
 	Connect,

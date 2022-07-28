@@ -13,22 +13,36 @@
 #include "ThreadManager.h"
 
 #include "SocketUtils.h"
+#include "Listener.h"
 
 int main()
 {
-	SOCKET socket = SocketUtils::CreateSocket();
+	//SOCKET socket = SocketUtils::CreateSocket();
 
-	SocketUtils::BindAnyAddress(socket, 7777);
+	//SocketUtils::BindAnyAddress(socket, 7777);
 
-	SocketUtils::Listen(socket);
+	//SocketUtils::Listen(socket);
 
-	SOCKET clientSocket = ::accept(socket, nullptr, nullptr);
+	//SOCKET clientSocket = ::accept(socket, nullptr, nullptr);
 
-	cout << "Client Connected!" << endl;
+	// IOCP를 관찰하는 쓰레드를 만들어 줘야 함
+	Listener listener;
+	listener.StartAccept(NetAddress(L"127.0.0.1", 7777));
 
-	while (true)
+	//while (true)
+	//{
+
+	//}
+
+	for (int32 i = 0; i < 5; i++)
 	{
-
+		GThreadManager->Launch([=]()
+			{
+				while (true)
+				{
+					GIocpCore.Dispatch();
+				}
+			});
 	}
 
 	GThreadManager->Join();

@@ -4,6 +4,10 @@
 #include "IocpEvent.h"
 #include "Session.h"
 
+/*--------------
+	Listener
+---------------*/
+
 Listener::~Listener()
 {
 	SocketUtils::Close(_socket);
@@ -55,7 +59,7 @@ void Listener::CloseSocket()
 
 HANDLE Listener::GetHandle()
 {
-	return HANDLE();
+	return reinterpret_cast<HANDLE>(_socket);
 }
 
 void Listener::Dispatch(IocpEvent* iocpEvent, int32 numOfBytes)
@@ -92,7 +96,7 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 {
 	Session* session = acceptEvent->GetSession();
 
-	if (SocketUtils::SetUpdateAcceptSocket(session->GetSocket(), _socket))
+	if (false == SocketUtils::SetUpdateAcceptSocket(session->GetSocket(), _socket))
 	{
 		RegisterAccept(acceptEvent);
 		return;
@@ -105,6 +109,12 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 		RegisterAccept(acceptEvent);
 		return;
 	}
+
+	session->SetNetAddress(NetAddress(sockAddress));
+
+	cout << "Client Connected" << endl;
+
+	// TODO
 
 	RegisterAccept(acceptEvent);
 }

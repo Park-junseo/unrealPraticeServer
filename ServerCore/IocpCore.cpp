@@ -2,6 +2,9 @@
 #include "IocpCore.h"
 #include "IocpEvent.h"
 
+// TEMP
+IocpCore GIocpCore;
+
 /*---------------
 	IocpCore
 ---------------*/
@@ -48,5 +51,5 @@ bool IocpCore::Dispatch(uint32 timeoutMs)
 		}
 	}
 
-	return false;
+	return true;
 }
