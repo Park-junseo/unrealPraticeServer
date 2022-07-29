@@ -125,7 +125,10 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 
 	cout << "Client Connected" << endl;
 
-	// TODO
-
+	session->SetNetAddress(NetAddress(sockAddress));
+	session->ProcessConnect();
+	/*리스너쪽에서 커낵션이 맺어지면 
+	리스너쪽에서 섹션 쪽 함수를 호출(OnConnected())
+	Listener에서 RegisterAccept로 비동기를 걸어주고 성공적으로 처리하면, ProcessAccept 호출*/
 	RegisterAccept(acceptEvent);
 }

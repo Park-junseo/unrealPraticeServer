@@ -25,6 +25,7 @@ void Service::CloseService()
 SessionRef Service::CreateSession()
 {
 	SessionRef session = _sessionFactory();
+	session->SetService(shared_from_this()); // 섹션을 만듬과 동시에 자기 자신을 연동
 
 	if (_iocpCore->Register(session) == false)
 		return nullptr;
