@@ -27,14 +27,14 @@ public:
 	HANDLE GetHandle() { return _iocpHandle; }
 
 	// Iocp에 등록하는 함수
-	bool Register(class IocpObject* iocpObject);
+	bool Register(IocpObjectRef iocpObject);
 	// 워커 쓰레드들이 Iocp에 일감이 있는지 검색
 	bool Dispatch(uint32 timeoutMs = INFINITE);
 
 private:
 	HANDLE _iocpHandle;
 };
-
-// TEMP
-extern IocpCore GIocpCore;
+//
+//// TEMP
+//extern IocpCore GIocpCore;
 

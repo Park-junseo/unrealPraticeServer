@@ -76,7 +76,7 @@ public:
 	virtual ~ServerService() {}
 
 	virtual bool	Start() override;
-	virtual bool	CloseService();
+	virtual void	CloseService() override;
 
 private:
 	// 서버이므로 리스너소켓 필요

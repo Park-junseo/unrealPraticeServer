@@ -12,13 +12,40 @@
 
 #include "ThreadManager.h"
 
-#include "SocketUtils.h"
-#include "Listener.h"
+#include "Service.h"
+#include "Session.h"
+
+//#include "SocketUtils.h"
+//#include "Listener.h"
+
+class GameSession : public Session
+{
+
+};
 
 int main()
 {
-	ListenerRef listener = MakeShared<Listener>();
-	listener->StartAccept(NetAddress(L"127.0.0.1", 7777));
+	//ListenerRef listener = MakeShared<Listener>();
+	//listener->StartAccept(NetAddress(L"127.0.0.1", 7777));
+
+	//for (int32 i = 0; i < 5; i++)
+	//{
+	//	GThreadManager->Launch([=]()
+	//		{
+	//			while (true)
+	//			{
+	//				GIocpCore.Dispatch();
+	//			}
+	//		});
+	//}
+
+	ServerServiceRef service = MakeShared<ServerService>(
+		NetAddress(L"127.0.0.1", 7777),
+		MakeShared<IocpCore>(),
+		MakeShared<GameSession>, // TODO : SessionManager 등
+		100);
+
+	ASSERT_CRASH(service->Start());
 
 	for (int32 i = 0; i < 5; i++)
 	{
@@ -26,7 +53,7 @@ int main()
 			{
 				while (true)
 				{
-					GIocpCore.Dispatch();
+					service->GetIocpCore()->Dispatch();
 				}
 			});
 	}

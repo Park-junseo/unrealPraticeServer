@@ -2,8 +2,8 @@
 #include "IocpCore.h"
 #include "IocpEvent.h"
 
-// TEMP
-IocpCore GIocpCore;
+//// TEMP
+//IocpCore GIocpCore;
 
 /*---------------
 	IocpCore
@@ -20,7 +20,7 @@ IocpCore::~IocpCore()
 	::CloseHandle(_iocpHandle);
 }
 
-bool IocpCore::Register(IocpObject* iocpObject)
+bool IocpCore::Register(IocpObjectRef iocpObject)
 {
 	// icocpHandle에 새로운 일감을 관찰하기 위해 등록
 	//return ::CreateIoCompletionPort(iocpObject->GetHandle(), _iocpHandle, reinterpret_cast<ULONG_PTR>(iocpObject), 0);
