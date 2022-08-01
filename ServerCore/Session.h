@@ -19,6 +19,8 @@ public:
 	virtual ~Session();
 
 public:
+						/* 외부에서 사용 */
+	void				Send(BYTE* buffer, int32 len);
 	void				Disconnect(const WCHAR* cause); // Disconnect할 때 사유도 출력
 
 	shared_ptr<Service>	GetService() { return _service.lock(); } // service로 shared_ptr로 반환
@@ -41,11 +43,11 @@ private:
 						/* 전송 관련 */
 	void				RegisterConnect();
 	void				RegisterRecv();
-	void				RegisterSend();
+	void				RegisterSend(SendEvent* sendEvent);
 	
 	void				ProcessConnect();
 	void				ProcessRecv(int32 numOfBytes);
-	void				ProcessSend(int32 numOfBytes);
+	void				ProcessSend(SendEvent* sendEvent, int32 numOfBytes);
 
 	void				HandleError(int32 errorCode);
 	/*
@@ -68,7 +70,14 @@ protected:
 
 public:
 	// TEMP
-	char _recvBuffer[1000];
+	BYTE _recvBuffer[1000];
+
+	// 보낼 내용을 저장하기 위해 멤버 변수 사용할 수 있음
+	// Circular buffer로 보낼 내용을 이어붙이고 끝부분 도달 시 나머지를 처음 부분부터 이어 붙여야 하는데,
+	//  이는 복사 비용이 많이 소모됨
+	// Circular Buffer [       ]
+	//char _sendBuffer[1000];
+	//int32 _sendLen = 0;
 
 private:
 	weak_ptr<Service>	_service;
