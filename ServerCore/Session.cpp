@@ -33,6 +33,10 @@ void Session::Send(BYTE* buffer, int32 len)
 	RegisterSend(sendEvent);
 }
 
+bool Session::Connect()
+{
+}
+
 void Session::Disconnect(const WCHAR* cause)
 {
 	if (_connected.exchange(false) == false)
@@ -41,7 +45,7 @@ void Session::Disconnect(const WCHAR* cause)
 	// TEMP
 	wcout << "Disconnect : " << cause << endl;
 
-	OnDisconnected(); // 컨텐츠 코드에서 오버로딩
+	OnDisconnected(); // 컨텐츠 코드에서 재정의
 	SocketUtils::Close(_socket);
 	GetService()->ReleaseSession(GetSessionRef());
 }
@@ -59,6 +63,9 @@ void Session::Dispatch(IocpEvent* iocpEvent, int32 numOfBytes)
 	case EventType::Connect:
 		ProcessConnect();
 		break;
+	case EventType::Disconnect:
+		ProcessDIsconnect();
+		break;
 	case EventType::Recv:
 		ProcessRecv(numOfBytes);
 		break;
@@ -70,8 +77,49 @@ void Session::Dispatch(IocpEvent* iocpEvent, int32 numOfBytes)
 	}
 }
 
-void Session::RegisterConnect()
+bool Session::RegisterConnect()
 {
+	if (IsConnected())
+		return false;
+
+	if (GetService()->GetServiceType() != ServiceType::Client)
+		return false;
+
+	if (SocketUtils::SetReuseAddress(_socket, true) == false)
+		return false;
+
+	if (SocketUtils::BindAnyAddress(_socket, 0 /*남는 거*/) == false)
+		return false;
+
+	_connectEvent.Init();
+	_connectEvent.owner = shared_from_this();
+
+	DWORD numOfBytes = 0;
+	SOCKADDR_IN sockAddr = GetService()->GetNetAddress().GetSockAddr();
+	if (false == SocketUtils::ConnectEx(_socket, reinterpret_cast<SOCKADDR*>(&sockAddr), sizeof(sockAddr), nullptr, 0, &numOfBytes, &_connectEvent))
+	{
+		int32 errorCode = ::WSAGetLastError();
+		if (errorCode != WSA_IO_PENDING)
+		{
+			_connectEvent.owner = nullptr; // RELEASE_REF
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool Session::RegisterDisconnect()
+{
+	_disconnectEvent.Init();
+	_disconnectEvent.owner = shared_from_this(); // ADD_REF
+
+	if (false == SocketUtils::DisconnectEx(_socket, &_disconnectEvent, TF_REUSE_SOCKET, 0))
+	{
+
+	}
+
+	return true;
 }
 
 void Session::RegisterRecv()
@@ -128,16 +176,22 @@ void Session::RegisterSend(SendEvent* sendEvent)
 
 void Session::ProcessConnect()
 {
+	_connectEvent.owner = nullptr; // RELEASE_REF
+
 	_connected.store(true);
 
 	// 세션 등록
 	GetService()->AddSession(GetSessionRef());
 
-	// 컨텐츠 코드에서 오버로딩
+	// 컨텐츠 코드에서 재정의
 	OnConnected();
 
 	// 수신 등록
 	RegisterRecv();
+}
+
+void Session::ProcessDisconnect()
+{
 }
 
 void Session::ProcessRecv(int32 numOfBytes)
@@ -168,7 +222,7 @@ void Session::ProcessSend(SendEvent* sendEvent, int32 numOfBytes)
 		return;
 	}
 
-	// 켄텐츠 코드에서 오버로딩
+	// 켄텐츠 코드에서 재정의
 	OnSend(numOfBytes);
 }
 
