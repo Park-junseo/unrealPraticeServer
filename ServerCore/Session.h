@@ -19,7 +19,7 @@ public:
 	virtual ~Session();
 
 public:
-	void				DisConnect(const WCHAR* cause); // Disconnect할 때 사유도 출력
+	void				Disconnect(const WCHAR* cause); // Disconnect할 때 사유도 출력
 
 	shared_ptr<Service>	GetService() { return _service.lock(); } // service로 shared_ptr로 반환
 	void				SetService(shared_ptr<Service> service) { _service = service; } // 외부에서 서비스 지정함수
@@ -47,7 +47,7 @@ private:
 	void				ProcessRecv(int32 numOfBytes);
 	void				ProcessSend(int32 numOfBytes);
 
-	void				HandleError(int32 erroCode);
+	void				HandleError(int32 errorCode);
 	/*
 	RegisterConnect()->ProcessConnect()
 	RegisterRecv()->ProcessRecv(int32)

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Session.h"
 #include "SocketUtils.h"
+#include "Service.h"
 
 /*-------------
 	Session
@@ -16,8 +17,17 @@ Session::~Session()
 	SocketUtils::Close(_socket);
 }
 
-void Session::DisConnect(const WCHAR* cause)
+void Session::Disconnect(const WCHAR* cause)
 {
+	if (_connected.exchange(false) == false)
+		return;
+
+	// TEMP
+	wcout << "Disconnect : " << cause << endl;
+
+	OnDisconnected(); // 컨텐츠 코드에서 오버로딩
+	SocketUtils::Close(_socket);
+	GetService()->ReleaseSession(GetSessionRef());
 }
 
 HANDLE Session::GetHandle()
@@ -28,6 +38,20 @@ HANDLE Session::GetHandle()
 void Session::Dispatch(IocpEvent* iocpEvent, int32 numOfBytes)
 {
 	// TODO
+	switch (iocpEvent->eventType)
+	{
+	case EventType::Connect:
+		ProcessConnect();
+		break;
+	case EventType::Recv:
+		ProcessRecv(numOfBytes);
+		break;
+	case EventType::Send:
+		ProcessSend(numOfBytes);
+		break;
+	default:
+		break;
+	}
 }
 
 void Session::RegisterConnect()
@@ -43,6 +67,7 @@ void Session::RegisterRecv()
 	//RecvEvent* recvEvent = xnew<RecvEvent>();
 	//recvEvent->owner = shared_from_this();
 	
+	_recvEvent.Init();
 	// 어차피 생성하므로 멤버변수로 재사용
 	_recvEvent.owner = shared_from_this(); // ADD_REF, Register 하는 동안 섹션일 살아있게 하기 위함
 
@@ -69,16 +94,51 @@ void Session::RegisterSend()
 
 void Session::ProcessConnect()
 {
+	_connected.store(true);
+
+	// 세션 등록
+	GetService()->AddSession(GetSessionRef());
+
+	// 컨텐츠 코드에서 오버로딩
+	OnConnected();
+
+	// 수신 등록
+	RegisterRecv();
 }
 
 void Session::ProcessRecv(int32 numOfBytes)
 {
+	// WSARecv가 완료가 된 상태이므로
+	_recvEvent.owner = nullptr; // Release_REF
+
+	if (numOfBytes == 0)
+	{
+		Disconnect(L"Recv 0");
+		return;
+	}
+
+	// TODO
+	cout << "Recv Data Len = " << numOfBytes << endl;
+
+	// 수신 등록
+	RegisterRecv();
 }
 
 void Session::ProcessSend(int32 numOfBytes)
 {
 }
 
-void Session::HandleError(int32 erroCode)
+void Session::HandleError(int32 errorCode)
 {
+	switch (errorCode)
+	{
+	case WSAECONNRESET:
+	case WSAECONNABORTED:
+		Disconnect(L"HandleError)");
+		break;
+	default:
+		// TODO : Log
+		cout << "Handle Error : " << errorCode << endl;
+		break;
+	}
 }
