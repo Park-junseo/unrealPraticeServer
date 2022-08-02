@@ -3,28 +3,35 @@
 
 #include "Service.h"
 #include "Session.h"
+#include "GameSession.h"
 
-class GameSession : public Session
-{
-public:
-	~GameSession()
-	{
-		cout << "~GameSession" << endl;
-	}
-
-	virtual int32 OnRecv(BYTE* buffer, int32 len) override
-	{
-		// Echo
-		cout << "OnRecv Len = " << len << endl;
-		Send(buffer, len);
-		return len;
-	}
-
-	virtual void OnSend(int32 len) override
-	{
-		cout << "OnSend Len = " << len << endl;
-	}
-};
+//class GameSession2 : public Session
+//{
+//public:
+//	~GameSession2()
+//	{
+//		cout << "~GameSession" << endl;
+//	}
+//
+//	virtual int32 OnRecv(BYTE* buffer, int32 len) override
+//	{
+//		//// Echo
+//		//cout << "OnRecv Len = " << len << endl;
+//		//Send(buffer, len);
+//		//return len;
+//
+//		// Echo
+//		SendBufferRef sendBuffer = MakeShared<SendBuffer>(4096);
+//		sendBuffer->CopyData(buffer, len);
+//		Send(sendBuffer);
+//		return len;
+//	}
+//
+//	virtual void OnSend(int32 len) override
+//	{
+//		cout << "OnSend Len = " << len << endl;
+//	}
+//};
 
 int main()
 {

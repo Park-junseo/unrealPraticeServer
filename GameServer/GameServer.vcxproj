@@ -167,6 +167,8 @@
     <ClCompile Include="ConcurrentQueue.cpp" />
     <ClCompile Include="ConcurrentStack.cpp" />
     <ClCompile Include="GameServer.cpp" />
+    <ClCompile Include="GameSession.cpp" />
+    <ClCompile Include="GameSessionManager.cpp" />
     <ClCompile Include="LAccountManager.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -181,6 +183,8 @@
     <ClInclude Include="AccountManager.h" />
     <ClInclude Include="ConcurrentQueue.h" />
     <ClInclude Include="ConcurrentStack.h" />
+    <ClInclude Include="GameSession.h" />
+    <ClInclude Include="GameSessionManager.h" />
     <ClInclude Include="LAccountManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PlayerManager.h" />
