@@ -47,7 +47,7 @@ bool Listener::StartAccept(ServerServiceRef service)
 	if (SocketUtils::Listen(_socket) == false)
 		return false;
 
-	const int32 acceptCount = _service->GetmaxSessionCount();
+	const int32 acceptCount = _service->GetMaxSessionCount();
 	for (int32 i = 0; i < acceptCount; i++)
 	{
 		AcceptEvent* acceptEvent = xnew<AcceptEvent>();
@@ -123,7 +123,7 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 
 	session->SetNetAddress(NetAddress(sockAddress));
 
-	cout << "Client Connected" << endl;
+	//cout << "Client Connected" << endl;
 
 	session->SetNetAddress(NetAddress(sockAddress));
 	session->ProcessConnect();

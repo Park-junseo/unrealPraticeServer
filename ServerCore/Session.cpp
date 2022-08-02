@@ -35,6 +35,7 @@ void Session::Send(BYTE* buffer, int32 len)
 
 bool Session::Connect()
 {
+	return RegisterConnect();
 }
 
 void Session::Disconnect(const WCHAR* cause)
@@ -46,8 +47,9 @@ void Session::Disconnect(const WCHAR* cause)
 	wcout << "Disconnect : " << cause << endl;
 
 	OnDisconnected(); // ÄÁÅÙÃ÷ ÄÚµå¿¡¼­ ÀçÁ¤ÀÇ
-	SocketUtils::Close(_socket);
 	GetService()->ReleaseSession(GetSessionRef());
+
+	RegisterDisconnect();
 }
 
 HANDLE Session::GetHandle()
@@ -64,7 +66,7 @@ void Session::Dispatch(IocpEvent* iocpEvent, int32 numOfBytes)
 		ProcessConnect();
 		break;
 	case EventType::Disconnect:
-		ProcessDIsconnect();
+		ProcessDisconnect();
 		break;
 	case EventType::Recv:
 		ProcessRecv(numOfBytes);
@@ -92,7 +94,7 @@ bool Session::RegisterConnect()
 		return false;
 
 	_connectEvent.Init();
-	_connectEvent.owner = shared_from_this();
+	_connectEvent.owner = shared_from_this(); // ADD_REF
 
 	DWORD numOfBytes = 0;
 	SOCKADDR_IN sockAddr = GetService()->GetNetAddress().GetSockAddr();
@@ -116,7 +118,12 @@ bool Session::RegisterDisconnect()
 
 	if (false == SocketUtils::DisconnectEx(_socket, &_disconnectEvent, TF_REUSE_SOCKET, 0))
 	{
-
+		int32 errorCode = ::WSAGetLastError();
+		if (errorCode != WSA_IO_PENDING)
+		{
+			_disconnectEvent.owner = nullptr; // RELEASE_REF
+			return false;
+		}
 	}
 
 	return true;
@@ -192,6 +199,7 @@ void Session::ProcessConnect()
 
 void Session::ProcessDisconnect()
 {
+	_disconnectEvent.owner = nullptr; // RELEASE_REF
 }
 
 void Session::ProcessRecv(int32 numOfBytes)
@@ -232,7 +240,7 @@ void Session::HandleError(int32 errorCode)
 	{
 	case WSAECONNRESET:
 	case WSAECONNABORTED:
-		Disconnect(L"HandleError)");
+		Disconnect(L"HandleError");
 		break;
 	default:
 		// TODO : Log

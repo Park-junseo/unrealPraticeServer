@@ -32,7 +32,7 @@ public:
 	void			AddSession(SessionRef session);
 	void			ReleaseSession(SessionRef session);
 	int32			GetCurrentSessionCount() { return _sessionCount; }
-	int32			GetmaxSessionCount() { return _maxSessionCount; }
+	int32			GetMaxSessionCount() { return _maxSessionCount; }
 
 public:
 	ServiceType		GetServiceType() { return _type; }
