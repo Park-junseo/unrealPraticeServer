@@ -2,6 +2,7 @@
 #include "IocpCore.h"
 #include "IocpEvent.h"
 #include "NetAddress.h"
+#include "RecvBuffer.h"
 
 class Service;
 
@@ -14,6 +15,11 @@ class Session : public IocpObject
 	friend class Listener;
 	friend class IocpCore;
 	friend class Service;
+
+	enum
+	{
+		BUFFER_SIZE = 0x10000, //64KB
+	};
 public:
 	Session();
 	virtual ~Session();
@@ -71,16 +77,16 @@ protected:
 	virtual void		OnSend(int32 len) { }
 	virtual void		OnDisconnected() { }
 
-public:
-	// TEMP
-	BYTE _recvBuffer[1000];
-
-	// 보낼 내용을 저장하기 위해 멤버 변수 사용할 수 있음
-	// Circular buffer로 보낼 내용을 이어붙이고 끝부분 도달 시 나머지를 처음 부분부터 이어 붙여야 하는데,
-	//  이는 복사 비용이 많이 소모됨
-	// Circular Buffer [       ]
-	//char _sendBuffer[1000];
-	//int32 _sendLen = 0;
+//public:
+//	// TEMP
+//	BYTE _recvBuffer[1000];
+//
+//	// 보낼 내용을 저장하기 위해 멤버 변수 사용할 수 있음
+//	// Circular buffer로 보낼 내용을 이어붙이고 끝부분 도달 시 나머지를 처음 부분부터 이어 붙여야 하는데,
+//	//  이는 복사 비용이 많이 소모됨
+//	// Circular Buffer [       ]
+//	//char _sendBuffer[1000];
+//	//int32 _sendLen = 0;
 
 private:
 	weak_ptr<Service>	_service;
@@ -93,7 +99,8 @@ private:
 private:
 	USE_LOCK;
 
-	/* 수신 관련 */
+						/* 수신 관련 */
+	RecvBuffer			_recvBuffer;
 
 	/* 송신 관련 */
 
