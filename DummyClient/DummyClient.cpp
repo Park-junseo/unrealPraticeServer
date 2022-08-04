@@ -3,9 +3,41 @@
 #include "Service.h"
 #include "Session.h"
 #include "BufferReader.h"
+#include "ClientPacketHandler.h"
 
 char sendData[] = "Hello World";
 
+class ServerSession : public PacketSession
+{
+public:
+	~ServerSession()
+	{
+		cout << "~ServerSession" << endl;
+	}
+
+	virtual void OnConnected() override
+	{
+
+	}
+
+	virtual void OnRecvPacket(BYTE* buffer, int32 len) override
+	{
+		ClientPacketHandler::HandlePacket(buffer, len);
+	}
+
+	virtual void OnSend(int32 len) override
+	{
+
+	}
+
+	virtual void OnDisconnected() override
+	{
+
+	}
+};
+
+// ...Buffer Handler
+/*
 class ServerSession : public PacketSession
 {
 public:
@@ -83,7 +115,7 @@ public:
 		//cout << "Disconnected" << endl;
 	}
 };
-
+*/
 int main()
 {
 	this_thread::sleep_for(1s);
@@ -92,7 +124,7 @@ int main()
 		NetAddress(L"127.0.0.1", 7777),
 		MakeShared<IocpCore>(),
 		MakeShared<ServerSession>, // TODO : SessionManager 등
-		1000);
+		1);
 
 	ASSERT_CRASH(service->Start());
 

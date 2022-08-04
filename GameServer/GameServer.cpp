@@ -6,6 +6,7 @@
 #include "GameSession.h"
 #include "GameSessionManager.h"
 #include "BufferWriter.h"
+#include "ServerPacketHandler.h"
 
 int main()
 {
@@ -50,20 +51,8 @@ int main()
 
 	while (true)
 	{
-		SendBufferRef sendBuffer = GSendBufferManager->Open(4096);
-
-		BufferWriter bw(sendBuffer->Buffer(), 4096);
-
-		PacketHeader* header = bw.Reserve<PacketHeader>();
-
-		// id(uint64), 체력(uint32), 공격력(uint16)
-		bw << (uint64)1001 << (uint32)100 << (uint16)10;
-		bw.Write(sendData, sizeof(sendData));
-
-		header->size = bw.WriteSize();
-		header->id = 1; // 1: Test Msg
-
-		sendBuffer->Close(bw.WriteSize());
+		vector<BuffData> buffs{ BuffData { 100, 1.5f}, BuffData { 200, 2.3f},  BuffData { 400, 19.0f} };
+		SendBufferRef sendBuffer = ServerPacketHandler::Make_S_TEST(1001, 100, 10, buffs);
 
 		//Send(sendBuffer);
 		// BroadCast로 변경
