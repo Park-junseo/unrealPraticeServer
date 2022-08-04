@@ -9,10 +9,11 @@ class SendBufferChunk;
 class SendBuffer// : public enable_shared_from_this<SendBuffer>
 {
 public:
-	SendBuffer(SendBufferChunkRef owner, BYTE* buffer, int32 allocSize);
+	SendBuffer(SendBufferChunkRef owner, BYTE* buffer, uint32 allocSize);
 	~SendBuffer();
 
 	BYTE*		Buffer() { return _buffer; }
+	uint32		AllocSize() { return _allocSize; }
 	// 사용할 버퍼 사이즈
 	int32		WriteSize() { return _writeSize; }
 	//// 버퍼 총용량

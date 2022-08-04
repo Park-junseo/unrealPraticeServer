@@ -96,7 +96,7 @@
     <ClInclude Include="BufferReader.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="BufferWrier.h">
+    <ClInclude Include="BufferWriter.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
@@ -167,7 +167,7 @@
     <ClCompile Include="BufferReader.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="BufferWrier.cpp">
+    <ClCompile Include="BufferWriter.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>

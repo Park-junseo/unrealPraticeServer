@@ -10,7 +10,7 @@
 //	_buffer.resize(bufferSize);
 //}
 
-SendBuffer::SendBuffer(SendBufferChunkRef owner, BYTE* buffer, int32 allocSize)
+SendBuffer::SendBuffer(SendBufferChunkRef owner, BYTE* buffer, uint32 allocSize)
 	: _owner(owner), _buffer(buffer), _allocSize(allocSize)
 {
 }
