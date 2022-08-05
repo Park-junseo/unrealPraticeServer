@@ -98,6 +98,16 @@ void ClientPacketHandler::Handle_S_TEST(BYTE* buffer, int32 len)
 		cout << "BufInfo : " << buffs[i].buffId << " " << buffs[i].remainTime << endl;
 	}
 
+	for (auto it = buffs.begin(); it != buffs.end(); ++it)
+	{
+		cout << "BufInfo : " << it->buffId << " " << it->remainTime << endl;
+	}
+
+	for (auto& buff : buffs)
+	{
+		cout << "BufInfo : " << buff.buffId << " " << buff.remainTime << endl;
+	}
+
 	//wstring name;
 	//uint16 nameLen;
 	//br >> nameLen;
