@@ -1,3 +1,5 @@
+#pragma once
+
 /*------------------
 	BufferWriter
 ------------------*/
@@ -19,7 +21,7 @@ public:
 	bool			Write(void* src, uint32 len);
 
 	template<typename T>
-	T*				Reserve();
+	T*				Reserve(uint16 count = 1);
 
 	//template<typename T>
 	//BufferWriter&	operator<<(const T& src);
@@ -34,13 +36,13 @@ private:
 };
 
 template<typename T>
-inline T* BufferWriter::Reserve()
+T* BufferWriter::Reserve(uint16 count)
 {
-	if(FreeSize() < sizeof(T))
+	if(FreeSize() < (sizeof(T) * count))
 		return nullptr;
 
 	T* ret = reinterpret_cast<T*>(&_buffer[_pos]);
-	_pos += sizeof(T);
+	_pos += (sizeof(T) * count);
 	return ret;
 }
 
@@ -53,7 +55,7 @@ inline T* BufferWriter::Reserve()
 //}
 
 template<typename T>
-inline BufferWriter& BufferWriter::operator<<(T&& src)
+BufferWriter& BufferWriter::operator<<(T&& src)
 {
 	using DataType = std::remove_reference_t<T>;
 	*reinterpret_cast<DataType*>(&_buffer[_pos]) = std::forward<DataType>(src);
