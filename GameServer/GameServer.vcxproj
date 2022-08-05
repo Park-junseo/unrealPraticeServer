@@ -72,29 +72,29 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)ServerCore\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Libraries\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Libraries\Include\;$(SolutionDir)ServerCore\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Libraries\Libs\;$(LibraryPath)</LibraryPath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
     <OutDir>$(SolutionDir)Binary\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)ServerCore\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Libraries\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Libraries\Include\;$(SolutionDir)ServerCore\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Libraries\Libs\;$(LibraryPath)</LibraryPath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
     <OutDir>$(SolutionDir)Binary\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)ServerCore\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Libraries\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Libraries\Include\;$(SolutionDir)ServerCore\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Libraries\Libs\;$(LibraryPath)</LibraryPath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
     <OutDir>$(SolutionDir)Binary\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)ServerCore\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Libraries\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)Libraries\Include\;$(SolutionDir)ServerCore\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Libraries\Libs\;$(LibraryPath)</LibraryPath>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
     <OutDir>$(SolutionDir)Binary\$(Configuration)\</OutDir>
   </PropertyGroup>
@@ -177,6 +177,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PlayerManager.cpp" />
+    <ClCompile Include="Protocol.pb.cc">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="ServerPacketHandler.cpp" />
     <ClCompile Include="UserManager.cpp" />
   </ItemGroup>
@@ -189,6 +195,7 @@
     <ClInclude Include="LAccountManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PlayerManager.h" />
+    <ClInclude Include="Protocol.pb.h" />
     <ClInclude Include="ServerPacketHandler.h" />
     <ClInclude Include="UserManager.h" />
   </ItemGroup>
