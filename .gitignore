@@ -350,3 +350,6 @@ MigrationBackup/
 .ionide/
 
 !.gitkeep
+!Common/Protobuf/[Bb]in/
+!Libraries/Libs/Protobuf/**
+!**/google/protobuf/**
