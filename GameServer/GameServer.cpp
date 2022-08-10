@@ -32,6 +32,34 @@ int main()
 			});
 	}
 
+	GThreadManager->Join();
+}
+
+// ...Packet Automatic
+/*
+int main()
+{
+	ClientPacketHandler::Init();
+
+	ServerServiceRef service = MakeShared<ServerService>(
+		NetAddress(L"127.0.0.1", 7777),
+		MakeShared<IocpCore>(),
+		MakeShared<GameSession>, // TODO : SessionManager 등
+		100);
+
+	ASSERT_CRASH(service->Start());
+
+	for (int32 i = 0; i < 5; i++)
+	{
+		GThreadManager->Launch([=]()
+			{
+				while (true)
+				{
+					service->GetIocpCore()->Dispatch();
+				}
+			});
+	}
+
 	//char sendData[1000] = "가"; // CP949 = KS-X-1001(한글2바이트) + KS-X-1003(로마 1바이트)
 	WCHAR sendData3[1000] = L"가"; // UTF16 = Unicode (한글/로마 2바이트)
 
@@ -64,7 +92,7 @@ int main()
 
 	GThreadManager->Join();
 }
-
+*/
 // Packet Serialization
 /*
 #include <tchar.h>
