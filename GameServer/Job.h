@@ -1,7 +1,7 @@
 #pragma once
 
 // C++11 apply
-
+/*
 template<int... Remains>
 struct seq
 {};
@@ -141,3 +141,4 @@ private:
 	USE_LOCK;
 	queue<JobRef> _jobs;
 };
+*/

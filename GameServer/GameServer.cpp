@@ -10,7 +10,54 @@
 #include "Protocol.pb.h"
 #include "Job.h"
 #include "Room.h"
+#include "Player.h"
 
+int main()
+{
+	//PlayerRef player = make_shared<Player>();
+
+	//std::function<void()> func = [self = GRoom, &player]()
+	//{
+	//	self->Enter(player);
+	//};
+
+	//// TODO
+
+	//func();
+
+	ClientPacketHandler::Init();
+
+	ServerServiceRef service = MakeShared<ServerService>(
+		NetAddress(L"127.0.0.1", 7777),
+		MakeShared<IocpCore>(),
+		MakeShared<GameSession>, // TODO : SessionManager 등
+		100);
+
+	ASSERT_CRASH(service->Start());
+
+	for (int32 i = 0; i < 5; i++)
+	{
+		GThreadManager->Launch([=]()
+			{
+				while (true)
+				{
+					service->GetIocpCore()->Dispatch();
+				}
+			});
+	}
+
+	while (true)
+	{
+		GRoom->FlushJob();
+		this_thread::sleep_for(1ms);
+	}
+
+	GThreadManager->Join();
+}
+
+
+// JobQueue #2
+/*
 void HealByValue(int64 target, int32 value)
 {
 	cout << target << "한테 힐 " << value << "만큼 줌" << endl;
@@ -23,6 +70,17 @@ public:
 	{
 		cout << "Knight 힐:" << value << endl;
 	}
+
+	void Test()
+	{
+		auto job = [this]()
+		{
+			HealMe(this->_hp);
+		};
+	}
+
+private:
+	int32 _hp = 100;
 };
 
 int main()
@@ -41,18 +99,18 @@ int main()
 	//}
 
 	// TEST JOB
-	{
-		//FuncJob<void, int64, int32> job(HealByValue);
-		FuncJob<void, int64, int32> job(HealByValue, 100, 00);
+	//{
+	//	//FuncJob<void, int64, int32> job(HealByValue);
+	//	FuncJob<void, int64, int32> job(HealByValue, 100, 00);
 
-		//job(100, 10);
-		job.Execute();
-	}
-	{
-		Knight k1;
-		MemberJob job2(&k1, &Knight::HealMe, 10);
-		job2.Execute();
-	}
+	//	//job(100, 10);
+	//	job.Execute();
+	//}
+	//{
+	//	Knight k1;
+	//	MemberJob job2(&k1, &Knight::HealMe, 10);
+	//	job2.Execute();
+	//}
 
 	// JOB
 
@@ -85,7 +143,7 @@ int main()
 
 	GThreadManager->Join();
 }
-
+*/
 // ... Chatting Practice
 /*
 int main()
