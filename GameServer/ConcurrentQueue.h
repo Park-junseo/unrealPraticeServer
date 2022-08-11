@@ -2,13 +2,13 @@
 #include <mutex>
 
 template<typename T>
-class LockQueue
+class LockQueue_
 {
 public:
-	LockQueue() {}
+	LockQueue_() {}
 
-	LockQueue(const LockQueue&) = delete;
-	LockQueue& operator=(const LockQueue&) = delete;
+	LockQueue_(const LockQueue_&) = delete;
+	LockQueue_& operator=(const LockQueue_&) = delete;
 
 	void Push(T value)
 	{

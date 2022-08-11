@@ -106,7 +106,7 @@ private:
 	RecvBuffer				_recvBuffer;
 
 							/* 송신 관련 */
-	xQeque<SendBufferRef>	_sendQueue;
+	xQueue<SendBufferRef>	_sendQueue;
 	Atomic<bool>			_sendRegistered = false;
 
 private:

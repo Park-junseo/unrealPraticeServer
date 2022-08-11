@@ -14,6 +14,34 @@
 
 int main()
 {
+	ClientPacketHandler::Init();
+
+	ServerServiceRef service = MakeShared<ServerService>(
+		NetAddress(L"127.0.0.1", 7777),
+		MakeShared<IocpCore>(),
+		MakeShared<GameSession>, // TODO : SessionManager 등
+		100);
+
+	ASSERT_CRASH(service->Start());
+
+	for (int32 i = 0; i < 5; i++)
+	{
+		GThreadManager->Launch([=]()
+			{
+				while (true)
+				{
+					service->GetIocpCore()->Dispatch();
+				}
+			});
+	}
+
+	GThreadManager->Join();
+}
+
+// JobQueue #3
+/*
+int main()
+{
 	//PlayerRef player = make_shared<Player>();
 
 	//std::function<void()> func = [self = GRoom, &player]()
@@ -54,7 +82,7 @@ int main()
 
 	GThreadManager->Join();
 }
-
+*/
 
 // JobQueue #2
 /*
@@ -2461,7 +2489,7 @@ int main()
 #include "ConcurrentQueue.h"
 #include "ConcurrentStack.h"
 
-LockQueue<int32> q;
+LockQueue_<int32> q;
 LockStack<int32> s;
 LockFreeStack<int32> fs;
 LockFreeSmartStack<int32> ss;

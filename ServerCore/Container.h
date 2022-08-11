@@ -32,7 +32,7 @@ template<typename Type>
 using xDeque = deque<Type, StlAllocator<Type>>;
 
 template<typename Type, typename Container = xDeque<Type>>
-using xQeque = queue<Type, Container>;
+using xQueue = queue<Type, Container>;
 
 template<typename Type, typename Container = xDeque<Type>>
 using xStack = stack<Type, Container>;
