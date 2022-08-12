@@ -12,6 +12,54 @@
 #include "Room.h"
 #include "Player.h"
 
+enum
+{
+	WORKER_TICK = 64
+};
+
+void DoWorkerJob(ServerServiceRef& service)
+{
+	while (true)
+	{
+		LEndTickCount = ::GetTickCount64() + WORKER_TICK;
+
+		// 네트워크 입출력 처리 -> 인게임 로직까지 (패킷 핸들러에 의해)
+		// Displatch에 시간을 인수로 넘겨 시간을 초과할 시 빠져나오게 함
+		service->GetIocpCore()->Dispatch(10);
+
+		// 글로벌 큐
+		ThreadManager::DoGlobalQueueWork(); 
+	}
+}
+
+int main()
+{
+	ClientPacketHandler::Init();
+
+	ServerServiceRef service = MakeShared<ServerService>(
+		NetAddress(L"127.0.0.1", 7777),
+		MakeShared<IocpCore>(),
+		MakeShared<GameSession>, // TODO : SessionManager 등
+		100);
+
+	ASSERT_CRASH(service->Start());
+
+	for (int32 i = 0; i < 5; i++)
+	{
+		GThreadManager->Launch([&service]()
+			{
+				DoWorkerJob(service);
+			});
+	}
+
+	// 메인 쓰레드도 균등하게 처리
+	DoWorkerJob(service);
+
+	GThreadManager->Join();
+}
+
+// JobQueue #4
+/*
 int main()
 {
 	ClientPacketHandler::Init();
@@ -37,7 +85,7 @@ int main()
 
 	GThreadManager->Join();
 }
-
+*/
 // JobQueue #3
 /*
 int main()

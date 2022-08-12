@@ -16,7 +16,7 @@ public:
 		if (_items.empty())
 			return T();
 
-		JobRef ret = _items.front();
+		T ret = _items.front();
 		_items.pop();
 		return ret;
 	}
