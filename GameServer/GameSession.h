@@ -16,4 +16,7 @@ public:
 
 public:
 	xVector<PlayerRef> _players;
+
+	PlayerRef _currentPlayer;
+	weak_ptr<class Room> _room;
 };
