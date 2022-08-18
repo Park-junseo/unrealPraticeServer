@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "DBConnectionPool.h"
 
+/*----------------------
+	DBConnectionPool
+----------------------*/
+
 DBConnectionPool::DBConnectionPool()
 {
 }
