@@ -22,6 +22,9 @@
     <Filter Include="DB">
       <UniqueIdentifier>{1a9141dc-48cd-4fb2-bb3c-57d354b237d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils\XML">
+      <UniqueIdentifier>{953089bf-8c0e-4ec7-a766-aa01d12a95e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CorePch.h">
@@ -129,6 +132,24 @@
     <ClInclude Include="DBBind.h">
       <Filter>DB</Filter>
     </ClInclude>
+    <ClInclude Include="rapidxml.hpp">
+      <Filter>Utils\XML</Filter>
+    </ClInclude>
+    <ClInclude Include="rapidxml_iterators.hpp">
+      <Filter>Utils\XML</Filter>
+    </ClInclude>
+    <ClInclude Include="rapidxml_print.hpp">
+      <Filter>Utils\XML</Filter>
+    </ClInclude>
+    <ClInclude Include="rapidxml_utils.hpp">
+      <Filter>Utils\XML</Filter>
+    </ClInclude>
+    <ClInclude Include="FileUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlParser.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CorePch.cpp">
@@ -223,6 +244,12 @@
     </ClCompile>
     <ClCompile Include="DBBind.cpp">
       <Filter>DB</Filter>
+    </ClCompile>
+    <ClCompile Include="FileUtils.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlParser.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

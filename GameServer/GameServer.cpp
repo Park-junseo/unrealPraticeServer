@@ -13,6 +13,7 @@
 #include "Player.h"
 #include "DBConnectionPool.h"
 #include "DBBind.h"
+#include "XmlParser.h"
 
 enum
 {
@@ -37,6 +38,91 @@ void DoWorkerJob(ServerServiceRef& service)
 	}
 }
 
+int main()
+{
+	//
+	XmlNode root;
+	XmlParser parser;
+	if (parser.ParseFromFile(L"GameDB.xml", OUT root) == false)
+		return 0;
+
+	xVector<XmlNode> tables = root.FindChildren(L"Table");
+	for (XmlNode& table : tables)
+	{
+		xString name = table.GetStringAttr(L"name");
+		xString desc = table.GetStringAttr(L"desc");
+
+		xVector<XmlNode> columns = table.FindChildren(L"Column");
+		for (XmlNode& column : columns)
+		{
+			xString colName = column.GetStringAttr(L"name");
+			xString colType = column.GetStringAttr(L"type");
+			bool nullable = !column.GetBoolAttr(L"notnull", false);
+			xString identity = column.GetStringAttr(L"identity");
+			xString colDefault = column.GetStringAttr(L"default");
+			// Etc...
+		}
+
+		xVector<XmlNode> indices = table.FindChildren(L"Index");
+		for (XmlNode& index : indices)
+		{
+			xString indexType = index.GetStringAttr(L"type");
+			bool primaryKey = index.FindChild(L"PrimaryKey").IsValid();
+			bool uniqueConstraint = index.FindChild(L"UniqueKey").IsValid();
+
+			xVector<XmlNode> columns = index.FindChildren(L"Column");
+			for (XmlNode& column : columns)
+			{
+				xString colName = column.GetStringAttr(L"name");
+			}
+		}
+	}
+
+	xVector<XmlNode> procedures = root.FindChildren(L"Procedure");
+	for (XmlNode& procedure : procedures)
+	{
+		xString name = procedure.GetStringAttr(L"name");
+		xString body = procedure.FindChild(L"Body").GetStringValue();
+
+		xVector<XmlNode> params = procedure.FindChildren(L"Param");
+		for (XmlNode& param : params)
+		{
+			xString paramName = param.GetStringAttr(L"name");
+			xString paramType = param.GetStringAttr(L"type");
+			// TODO..
+		}
+	}
+
+	// Thread 개수만큼 connectionCount를 부여할 수 있음
+	ASSERT_CRASH(GDBConnectionPool->Connect(1, L"Driver={ODBC Driver 17 for SQL Server};Server=(localdb)\\MSSQLLocalDB;Database=ServerDb;Trusted_Connection=Yes;"));
+
+	//
+	ClientPacketHandler::Init();
+
+	ServerServiceRef service = MakeShared<ServerService>(
+		NetAddress(L"127.0.0.1", 7777),
+		MakeShared<IocpCore>(),
+		MakeShared<GameSession>, // TODO : SessionManager 등
+		100);
+
+	ASSERT_CRASH(service->Start());
+
+	for (int32 i = 0; i < 5; i++)
+	{
+		GThreadManager->Launch([&service]()
+			{
+				DoWorkerJob(service);
+			});
+	}
+
+	// 메인 쓰레드도 균등하게 처리
+	DoWorkerJob(service);
+
+	GThreadManager->Join();
+}
+
+//DB Bind
+/*
 int main()
 {
 	//
@@ -183,7 +269,7 @@ int main()
 
 	GThreadManager->Join();
 }
-
+*/
 // DB Connection
 /*
 int main()

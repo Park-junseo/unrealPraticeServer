@@ -40,8 +40,8 @@ using xStack = stack<Type, Container>;
 template<typename Type, typename Container = xVector<Type>, typename Pred = less<typename Container::value_type>>
 using xPriorityQueue = priority_queue<Type, Container, Pred>;
 
-using xString = basic_string<char, char_traits<char>, StlAllocator<char>>;
-using xWString = basic_string<wchar_t, char_traits<wchar_t>, StlAllocator<wchar_t>>;
+//using xString = basic_string<char, char_traits<char>, StlAllocator<char>>;
+using xString = basic_string<wchar_t, char_traits<wchar_t>, StlAllocator<wchar_t>>;
 
 template<typename Key, typename Type, typename Hasher = hash<Key>, typename KeyEq = equal_to<Key>>
 using xHashMap = unordered_map<Key, Type, Hasher, KeyEq, StlAllocator<pair<const Key, Type>>>;
