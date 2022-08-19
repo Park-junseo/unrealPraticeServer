@@ -1,6 +1,16 @@
 #pragma once
 #include "DBConnection.h"
 
+//원하는 개수만큼의 비트가 채워짐
+template<int32 C>
+struct FullBits { enum { value = (1 << (C - 1)) | FullBits<C - 1>::value }; };
+
+template<>
+struct FullBits<1> { enum {value = 1}; };
+
+template<>
+struct FullBits<0> { enum {value = 0}; };
+
 template<int32 ParamCount, int32 ColumnCount>
 class DBBind
 {
@@ -17,7 +27,7 @@ public:
 
 	bool Validate()
 	{
-
+		return _paramFlag == FullBits<ParamCount>::value && _columnFlag == FullBits<ColumnCount>::value;
 	}
 
 	bool Execute()
@@ -38,27 +48,24 @@ public:
 		_dbConnection.BindParam(idx + 1, &value, &_paramIndex[idx]);
 		_paramFlag |= (1LL << idx);
 	}
-	
-	//문자열
+
 	void BindParam(int32 idx, const WCHAR* value)
 	{
-		_dbConnection.BindParam(idx + 1, vlaue, &_paramIndex[idx]);
+		_dbConnection.BindParam(idx + 1, value, &_paramIndex[idx]);
 		_paramFlag |= (1LL << idx);
 	}
 
-	//BYTE 배열
 	template<typename T, int32 N>
 	void BindParam(int32 idx, T(&value)[N])
 	{
-		_dbConnection.BindParam(idx + 1, (const BYTE*)vlaue, size32(T)*N, &_paramIndex[idx]);
+		_dbConnection.BindParam(idx + 1, (const BYTE*)value, size32(T) * N, &_paramIndex[idx]);
 		_paramFlag |= (1LL << idx);
 	}
 
-	//BYTE 배열
 	template<typename T>
 	void BindParam(int32 idx, T* value, int32 N)
 	{
-		_dbConnection.BindParam(idx + 1, (const BYTE*)vlaue, size32(T)*N, &_paramIndex[idx]);
+		_dbConnection.BindParam(idx + 1, (const BYTE*)value, size32(T) * N, &_paramIndex[idx]);
 		_paramFlag |= (1LL << idx);
 	}
 
@@ -69,13 +76,25 @@ public:
 		_columnFlag |= (1LL << idx);
 	}
 
-	template<typename N>
+	template<int32 N>
 	void BindCol(int32 idx, WCHAR(&value)[N])
 	{
-		_dbConnection.BindCol(idx + 1, value, N-1, &_columnIndex[idx]);
+		_dbConnection.BindCol(idx + 1, value, N - 1, &_columnIndex[idx]);
 		_columnFlag |= (1LL << idx);
 	}
 
+	void BindCol(int32 idx, WCHAR* value, int32 len)
+	{
+		_dbConnection.BindCol(idx + 1, value, len - 1, &_columnIndex[idx]);
+		_columnFlag |= (1LL << idx);
+	}
+
+	template<typename T, int32 N>
+	void BindCol(int32 idx, T(&value)[N])
+	{
+		_dbConnection.BindCol(idx + 1, value, size32(T) * N, &_columnIndex[idx]);
+		_columnFlag |= (1LL << idx);
+	}
 
 protected:
 	DBConnection&	_dbConnection;
