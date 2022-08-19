@@ -22,3 +22,5 @@ using namespace std;
 #include "SendBuffer.h"
 #include "Session.h"
 #include "LockQueue.h"
+#include "JobQueue.h"
+#include "ConsoleLog.h"

@@ -4,6 +4,7 @@
 		<Column name="id" type="int" notnull="true" />
 		<Column name="gold" type="int" notnull="false" />
 		<Column name="name" type="nvarchar(50)" notnull="false" />
+		<Column name="test" type="int" notnull="false" />
 		<Column name="createDate" type="datetime" notnull="false" />
 		<Index type="clustered">
 			<PrimaryKey/>

@@ -14,6 +14,7 @@
 #include "DBConnectionPool.h"
 #include "DBBind.h"
 #include "XmlParser.h"
+#include "DBSynchronizer.h"
 
 enum
 {
@@ -38,6 +39,42 @@ void DoWorkerJob(ServerServiceRef& service)
 	}
 }
 
+int main()
+{
+	// Thread 개수만큼 connectionCount를 부여할 수 있음
+	ASSERT_CRASH(GDBConnectionPool->Connect(1, L"Driver={ODBC Driver 17 for SQL Server};Server=(localdb)\\MSSQLLocalDB;Database=ServerDb;Trusted_Connection=Yes;"));
+
+	DBConnection* dbConn = GDBConnectionPool->Pop();
+	DBSynchronizer dbSync(*dbConn);
+	dbSync.Synchronize(L"GameDB.xml");
+
+	//
+	ClientPacketHandler::Init();
+
+	ServerServiceRef service = MakeShared<ServerService>(
+		NetAddress(L"127.0.0.1", 7777),
+		MakeShared<IocpCore>(),
+		MakeShared<GameSession>, // TODO : SessionManager 등
+		100);
+
+	ASSERT_CRASH(service->Start());
+
+	for (int32 i = 0; i < 5; i++)
+	{
+		GThreadManager->Launch([&service]()
+			{
+				DoWorkerJob(service);
+			});
+	}
+
+	// 메인 쓰레드도 균등하게 처리
+	DoWorkerJob(service);
+
+	GThreadManager->Join();
+}
+
+// XML Parse
+/*
 int main()
 {
 	//
@@ -120,6 +157,7 @@ int main()
 
 	GThreadManager->Join();
 }
+*/
 
 //DB Bind
 /*
